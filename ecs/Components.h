@@ -32,3 +32,22 @@ struct CollisionComponent {
 struct InputComponent {
     bool controlledByPlayer = true;
 };
+
+enum class GhostState { CHASE, SCATTER, FRIGHTENED, EATEN };
+
+struct AIComponent {
+    GhostState state;
+    float targetX, targetY;
+    int ghostType;          // 0: Blinky, 1: Pinky, 2: Inky, 3: Clyde
+};
+
+struct VisibilityComponent {
+    bool isVisible = false;
+    float opacity = 0.0f;
+};
+
+struct GameStateComponent {
+    float batteryLevel = 100.0f;
+    int score = 0;
+    bool isGameOver = false;
+};
