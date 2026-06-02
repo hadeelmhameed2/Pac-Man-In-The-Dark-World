@@ -18,11 +18,27 @@ add_executable(PacmanDarkWorld
 
         ecs/Entity.h
         ecs/Components.h
+
+        systems/InputSystem.h
+        systems/InputSystem.cpp
+        systems/MovementSystem.h
+        systems/MovementSystem.cpp
+        systems/RenderSystem.h
+        systems/RenderSystem.cpp
+        systems/InputSystem.h
+        systems/InputSystem.cpp
+        systems/MovementSystem.h
+        systems/MovementSystem.cpp
+        systems/RenderSystem.h
+        systems/RenderSystem.cpp
+        systems/BatterySystem.h
+        systems/BatterySystem.cpp
 )
 
 target_include_directories(PacmanDarkWorld PRIVATE
         src
         ecs
+        systems
         libs/SDL/include
 )
 

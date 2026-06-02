@@ -1,7 +1,7 @@
 #pragma once
 
-constexpr int WINDOW_WIDTH = 800;
-constexpr int WINDOW_HEIGHT = 600;
+constexpr int WINDOW_WIDTH = 850;
+constexpr int WINDOW_HEIGHT = 850;
 
 constexpr int TILE_SIZE = 32;
 

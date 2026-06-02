@@ -6,6 +6,11 @@
 #include "Entity.h"
 #include "Components.h"
 
+#include "InputSystem.h"
+#include "MovementSystem.h"
+#include "RenderSystem.h"
+#include "BatterySystem.h"
+
 class Game {
 public:
     bool init();
@@ -13,7 +18,6 @@ public:
     void clean();
 
 private:
-    void handleEvents();
     void update(float deltaTime);
     void render();
 
@@ -27,9 +31,19 @@ private:
 
     Entity pacman = 1;
 
+    VisionMode visionMode = VisionMode::Full;
+
     std::unordered_map<Entity, PositionComponent> positions;
     std::unordered_map<Entity, MovementComponent> movements;
     std::unordered_map<Entity, DrawingComponent> drawings;
     std::unordered_map<Entity, CollisionComponent> collisions;
     std::unordered_map<Entity, InputComponent> inputs;
+    std::unordered_map<Entity, DirectionComponent> directions;
+    std::unordered_map<Entity, FlashlightComponent> flashlights;
+    std::unordered_map<Entity, BatteryLifeComponent> batteries;
+
+    InputSystem inputSystem;
+    MovementSystem movementSystem;
+    RenderSystem renderSystem;
+    BatterySystem batterySystem;
 };
