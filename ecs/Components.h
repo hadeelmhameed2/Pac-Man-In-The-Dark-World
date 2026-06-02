@@ -1,5 +1,5 @@
 #pragma once
-
+#include "bagel.h"
 #include <SDL3/SDL.h>
 
 struct PositionComponent {
@@ -35,9 +35,9 @@ struct InputComponent {
 
 enum class GhostState { CHASE, SCATTER, FRIGHTENED, EATEN };
 
-struct AIComponent {
+struct GhostAI {
     GhostState state;
-    float targetX, targetY;
+    SDL_FPoint target;
     int ghostType;          // 0: Blinky, 1: Pinky, 2: Inky, 3: Clyde
 };
 
@@ -50,4 +50,14 @@ struct GameStateComponent {
     float batteryLevel = 100.0f;
     int score = 0;
     bool isGameOver = false;
+};
+
+template <> struct bagel::Storage<GhostAI> final : NoInstance {
+    using type = PackedStorage<GhostAI>;
+};
+template <> struct bagel::Storage<VisibilityComponent> final : NoInstance {
+    using type = PackedStorage<VisibilityComponent>;
+};
+template <> struct bagel::Storage<GameStateComponent> final : NoInstance {
+    using type = PackedStorage<GameStateComponent>;
 };
