@@ -4,14 +4,12 @@
 
 #include "Entity.h"
 #include "Components.h"
+#include "bagel.h"
 
 class MovementSystem {
 public:
     void update(
         float deltaTime,
-        std::unordered_map<Entity, PositionComponent>& positions,
-        std::unordered_map<Entity, MovementComponent>& movements,
-        std::unordered_map<Entity, CollisionComponent>& collisions,
         int windowWidth,
         int windowHeight
     );

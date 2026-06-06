@@ -2,9 +2,6 @@
 
 void MovementSystem::update(
     float deltaTime,
-    std::unordered_map<Entity, PositionComponent>& positions,
-    std::unordered_map<Entity, MovementComponent>& movements,
-    std::unordered_map<Entity, CollisionComponent>& collisions,
     int windowWidth,
     int windowHeight
 ) {
@@ -13,12 +10,21 @@ void MovementSystem::update(
     const float mazeRight = 742.0f;
     const float mazeBottom = 775.0f;
 
-    for (auto& [entity, movement] : movements) {
-        if (!positions.contains(entity)) {
-            continue;
-        }
+    static const bagel::Mask moveMask =
+     bagel::MaskBuilder()
+         .set<PositionComponent>()
+         .set<MovementComponent>()
+         .build();
 
-        auto& position = positions[entity];
+    for (bagel::Entity e = bagel::Entity::first();
+         !e.eof();
+         e.next())
+    {
+        if (!e.test(moveMask))
+            continue;
+
+        auto& position = e.get<PositionComponent>();
+        auto& movement = e.get<MovementComponent>();
 
         position.x += movement.vx * deltaTime;
         position.y += movement.vy * deltaTime;
@@ -26,24 +32,30 @@ void MovementSystem::update(
         int width = 32;
         int height = 32;
 
-        if (collisions.contains(entity)) {
-            width = collisions[entity].width;
-            height = collisions[entity].height;
+        if (e.has<CollisionComponent>())
+        {
+            auto& collision = e.get<CollisionComponent>();
+            width = collision.width;
+            height = collision.height;
         }
 
-        if (position.x < mazeLeft) {
+        if (position.x < mazeLeft)
+        {
             position.x = mazeLeft;
         }
 
-        if (position.y < mazeTop) {
+        if (position.y < mazeTop)
+        {
             position.y = mazeTop;
         }
 
-        if (position.x + width > mazeRight) {
+        if (position.x + width > mazeRight)
+        {
             position.x = mazeRight - width;
         }
 
-        if (position.y + height > mazeBottom) {
+        if (position.y + height > mazeBottom)
+        {
             position.y = mazeBottom - height;
         }
     }

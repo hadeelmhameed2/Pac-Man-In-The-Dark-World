@@ -1,13 +1,9 @@
 #include "InputSystem.h"
 
 void InputSystem::handleInput(
-    bool& running,
-    Entity pacman,
-    std::unordered_map<Entity, MovementComponent>& movements,
-    std::unordered_map<Entity, DirectionComponent>& directions,
-    std::unordered_map<Entity, FlashlightComponent>& flashlights,
-    std::unordered_map<Entity, BatteryLifeComponent>& batteries,
-    VisionMode& visionMode
+bool& running,
+ bagel::Entity pacman,
+ VisionMode& visionMode
 ) {
     SDL_Event event;
 
@@ -22,40 +18,41 @@ void InputSystem::handleInput(
                 return;
             }
 
-            if (!movements.contains(pacman)) {
+            /*if (!movements.contains(pacman)) {
                 return;
-            }
+            }*/
+            auto& movement = pacman.get<MovementComponent>();
+            auto& direction = pacman.get<DirectionComponent>();
+            auto& flashlight = pacman.get<FlashlightComponent>();
+            auto& battery = pacman.get<BatteryLifeComponent>();
 
-            auto& movement = movements[pacman];
 
             if (event.key.key == SDLK_RIGHT) {
                 movement.vx = movement.speed;
                 movement.vy = 0.0f;
-                directions[pacman].current = Direction::Right;
+                direction.current = Direction::Right;
             }
             else if (event.key.key == SDLK_LEFT) {
                 movement.vx = -movement.speed;
                 movement.vy = 0.0f;
-                directions[pacman].current = Direction::Left;
+                 direction.current = Direction::Left;
             }
             else if (event.key.key == SDLK_UP) {
                 movement.vx = 0.0f;
                 movement.vy = -movement.speed;
-                directions[pacman].current = Direction::Up;
+                 direction.current = Direction::Up;
             }
             else if (event.key.key == SDLK_DOWN) {
                 movement.vx = 0.0f;
                 movement.vy = movement.speed;
-                directions[pacman].current = Direction::Down;
+                 direction.current = Direction::Down;
             }
             else if (event.key.key == 'f' || event.key.key == 'F') {
                 if (
-                    flashlights.contains(pacman) &&
-                    flashlights[pacman].isAvailable &&
-                    batteries.contains(pacman) &&
-                    batteries[pacman].current > 0.0f
+                    flashlight.isAvailable &&
+                    battery.current > 0.0f
                 ) {
-                    flashlights[pacman].isOn = !flashlights[pacman].isOn;
+                    flashlight.isOn = !flashlight.isOn;
                 }
             }
             else if (event.key.key == '1') {

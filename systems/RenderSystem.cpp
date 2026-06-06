@@ -1,19 +1,14 @@
 #include "RenderSystem.h"
-
 #include <vector>
 #include <string>
 
 void RenderSystem::render(
     SDL_Renderer* renderer,
-    std::unordered_map<Entity, PositionComponent>& positions,
-    std::unordered_map<Entity, DrawingComponent>& drawings,
-    std::unordered_map<Entity, DirectionComponent>& directions,
-    std::unordered_map<Entity, FlashlightComponent>& flashlights,
     VisionMode visionMode
 ) {
-    if (renderer == nullptr) {
-        return;
-    }
+   if (renderer == nullptr) {
+    return;
+}
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
@@ -24,86 +19,129 @@ void RenderSystem::render(
     drawDots(renderer);
     drawGhosts(renderer);
 
-    for (auto& [entity, drawing] : drawings) {
-        if (!positions.contains(entity)) {
-            continue;
+
+    static const bagel::Mask drawMask =
+    bagel::MaskBuilder()
+        .set<PositionComponent>()
+        .set<DrawingComponent>()
+        .build();
+
+    static const bagel::Mask pacmanMask =
+        bagel::MaskBuilder()
+            .set<PositionComponent>()
+            .set<DrawingComponent>()
+            .set<DirectionComponent>()
+            .build();
+
+// Draw entities
+for (bagel::Entity e = bagel::Entity::first();
+     !e.eof();
+     e.next())
+{
+    if (!e.test(drawMask))
+        continue;
+
+    auto& position = e.get<PositionComponent>();
+    auto& drawing  = e.get<DrawingComponent>();
+
+    if (e.has<DirectionComponent>())
+    {
+        auto& direction = e.get<DirectionComponent>();
+
+        drawPacman(
+            renderer,
+            position,
+            drawing,
+            direction
+        );
+
+        if (e.has<FlashlightComponent>())
+        {
+            auto& flashlight = e.get<FlashlightComponent>();
+
+            if (flashlight.isOn &&
+                visionMode != VisionMode::Full)
+            {
+                drawFlashlight(
+                    renderer,
+                    position,
+                    drawing,
+                    direction
+                );
+            }
         }
+    }
+    else
+    {
+        SDL_FRect rect = {
+            position.x,
+            position.y,
+            static_cast<float>(drawing.width),
+            static_cast<float>(drawing.height)
+        };
 
-        auto& position = positions[entity];
+        SDL_SetRenderDrawColor(
+            renderer,
+            drawing.r,
+            drawing.g,
+            drawing.b,
+            drawing.a
+        );
 
-        if (directions.contains(entity)) {
-            drawPacman(
+        SDL_RenderFillRect(renderer, &rect);
+    }
+}
+
+// Darkness / flashlight effects
+for (bagel::Entity e = bagel::Entity::first();
+     !e.eof();
+     e.next())
+{
+    if (!e.test(pacmanMask))
+        continue;
+
+    auto& position  = e.get<PositionComponent>();
+    auto& drawing   = e.get<DrawingComponent>();
+    auto& direction = e.get<DirectionComponent>();
+
+    if (visionMode == VisionMode::MediumDark)
+    {
+        drawDarkOverlay(renderer, 120);
+
+        drawLightAroundPacman(
+            renderer,
+            position,
+            drawing,
+            120.0f
+        );
+    }
+    else if (visionMode == VisionMode::FlashlightOnly)
+    {
+        drawDarkOverlay(renderer, 225);
+
+        drawLightAroundPacman(
+            renderer,
+            position,
+            drawing,
+            35.0f
+        );
+
+        if (e.has<FlashlightComponent>() &&
+            e.get<FlashlightComponent>().isOn)
+        {
+            drawFlashlight(
                 renderer,
                 position,
                 drawing,
-                directions[entity]
+                direction
             );
-
-            if (
-                flashlights.contains(entity) &&
-                flashlights[entity].isOn &&
-                visionMode != VisionMode::Full
-            ) {
-                drawFlashlight(
-                    renderer,
-                    position,
-                    drawing,
-                    directions[entity]
-                );
-            }
-        }
-        else {
-            SDL_FRect rect = {
-                position.x,
-                position.y,
-                static_cast<float>(drawing.width),
-                static_cast<float>(drawing.height)
-            };
-
-            SDL_SetRenderDrawColor(
-                renderer,
-                drawing.r,
-                drawing.g,
-                drawing.b,
-                drawing.a
-            );
-
-            SDL_RenderFillRect(renderer, &rect);
         }
     }
 
-    for (auto& [entity, drawing] : drawings) {
-        if (!positions.contains(entity) || !directions.contains(entity)) {
-            continue;
-        }
+    break; // only one Pacman
+}
 
-        auto& position = positions[entity];
-
-        if (visionMode == VisionMode::MediumDark) {
-            drawDarkOverlay(renderer, 120);
-            drawLightAroundPacman(renderer, position, drawing, 120.0f);
-        }
-        else if (visionMode == VisionMode::FlashlightOnly) {
-            drawDarkOverlay(renderer, 225);
-            drawLightAroundPacman(renderer, position, drawing, 35.0f);
-
-            if (
-                flashlights.contains(entity) &&
-                flashlights[entity].isOn
-            ) {
-                drawFlashlight(
-                    renderer,
-                    position,
-                    drawing,
-                    directions[entity]
-                );
-            }
-        }
-
-        break;
-    }
-
-    SDL_RenderPresent(renderer);
+SDL_RenderPresent(renderer);
 }
 
 void RenderSystem::drawMaze(SDL_Renderer* renderer) {
@@ -240,6 +278,40 @@ void RenderSystem::drawGhost(
 
     drawFilledCircle(renderer, x + 10, y + 12, 2, 0, 0, 40, 255);
     drawFilledCircle(renderer, x + 21, y + 12, 2, 0, 0, 40, 255);
+}
+
+void RenderSystem::drawStatus(SDL_Window *window,VisionMode visionMode) {
+
+    static const bagel::Mask mask = bagel::MaskBuilder()
+            .set<BatteryLifeComponent>()
+            .build();
+
+    for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next()) {
+        if (e.test(mask)) {
+            std::string modeText;
+
+            if (visionMode == VisionMode::Full) {
+                modeText = "Full Vision";
+            }
+            else if (visionMode == VisionMode::MediumDark) {
+                modeText = "Medium Darkness";
+            }
+            else {
+                modeText = "Flashlight Only";
+            }
+
+            std::string title =
+                "Pacman in the Dark World | Battery: " +
+                std::to_string(static_cast<int>(e.get<BatteryLifeComponent>().current)) +
+                "% | Mode: " +
+                modeText;
+
+            SDL_SetWindowTitle(window, title.c_str());
+            return;
+        }
+
+    }
+
 }
 
 void RenderSystem::drawPacman(

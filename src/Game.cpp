@@ -40,7 +40,7 @@ bool Game::init() {
 }
 
 void Game::createPacman() {
-    positions[pacman] = PositionComponent{
+    /*positions[pacman] = PositionComponent{
         388.0f,
         690.0f
     };
@@ -84,7 +84,52 @@ void Game::createPacman() {
         100.0f,
         0.3f,
         1.2f
-    };
+    };*/
+
+    pacman=bagel::Entity::create();
+    pacman.addAll(
+        BatteryLifeComponent{
+        100.0f,
+        100.0f,
+        0.3f,
+        1.2f
+    },
+    FlashlightComponent{
+        false,
+        true
+    },
+    DirectionComponent{
+        Direction::Right
+    },
+    InputComponent{
+        true
+    },
+    PositionComponent{
+        388.0f,
+        690.0f
+    },
+
+   MovementComponent{
+        0.0f,
+        0.0f,
+        160.0f
+    },
+
+    DrawingComponent{
+        32,
+        32,
+        255,
+        255,
+        0,
+        255
+    },
+
+    CollisionComponent{
+        32,
+        32,
+        false
+    }
+    );
 }
 
 void Game::run() {
@@ -98,13 +143,10 @@ void Game::run() {
         inputSystem.handleInput(
             running,
             pacman,
-            movements,
-            directions,
-            flashlights,
-            batteries,
             visionMode
         );
 
+        renderSystem.drawStatus(window,visionMode);
         update(deltaTime);
         render();
 
@@ -115,50 +157,21 @@ void Game::run() {
 void Game::update(float deltaTime) {
     batterySystem.update(
         deltaTime,
-        pacman,
-        batteries,
-        flashlights
+        pacman
     );
 
     movementSystem.update(
         deltaTime,
-        positions,
-        movements,
-        collisions,
         WINDOW_WIDTH,
         WINDOW_HEIGHT
     );
 
-    if (batteries.contains(pacman)) {
-        std::string modeText;
 
-        if (visionMode == VisionMode::Full) {
-            modeText = "Full Vision";
-        }
-        else if (visionMode == VisionMode::MediumDark) {
-            modeText = "Medium Darkness";
-        }
-        else {
-            modeText = "Flashlight Only";
-        }
-
-        std::string title =
-            "Pacman in the Dark World | Battery: " +
-            std::to_string(static_cast<int>(batteries[pacman].current)) +
-            "% | Mode: " +
-            modeText;
-
-        SDL_SetWindowTitle(window, title.c_str());
-    }
 }
 
 void Game::render() {
     renderSystem.render(
         renderer,
-        positions,
-        drawings,
-        directions,
-        flashlights,
         visionMode
     );
 }
