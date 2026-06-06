@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL.h>
 #include <unordered_map>
+#include <box2d/box2d.h>
 
 #include "bagel.h"
 #include "Entity.h"
