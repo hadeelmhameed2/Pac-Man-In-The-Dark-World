@@ -35,6 +35,37 @@ bool Game::init() {
 
     createPacman();
 
+    std::cout
+    << "Position id = "
+    << (int)bagel::Component<PositionComponent>::Index
+    << std::endl;
+
+    std::cout << "Movement id = "
+              << (int)bagel::Component<MovementComponent>::Index
+              << std::endl;
+
+    std::cout << "Drawing id = "
+              << (int)bagel::Component<DrawingComponent>::Index
+              << std::endl;
+
+    std::cout << "Collision id = "
+              << (int)bagel::Component<CollisionComponent>::Index
+              << std::endl;
+
+    std::cout << "Direction id = "
+              << (int)bagel::Component<DirectionComponent>::Index
+              << std::endl;
+
+    std::cout << "Battery id = "
+              << (int)bagel::Component<BatteryLifeComponent>::Index
+              << std::endl;
+
+    std::cout << "Flashlight id = "
+              << (int)bagel::Component<FlashlightComponent>::Index
+              << std::endl;
+
+
+   std::cout << "Pacman created World max id:" << bagel::World::maxId() <<std::endl;
     running = true;
     return true;
 }
@@ -130,6 +161,33 @@ void Game::createPacman() {
         false
     }
     );
+    std::cout << "Position: "
+          << pacman.has<PositionComponent>()
+          << std::endl;
+
+    std::cout << "Movement: "
+              << pacman.has<MovementComponent>()
+              << std::endl;
+
+    std::cout << "Drawing: "
+              << pacman.has<DrawingComponent>()
+              << std::endl;
+
+    std::cout << "Collision: "
+              << pacman.has<CollisionComponent>()
+              << std::endl;
+
+    std::cout << "Direction: "
+              << pacman.has<DirectionComponent>()
+              << std::endl;
+
+    std::cout << "Battery: "
+              << pacman.has<BatteryLifeComponent>()
+              << std::endl;
+
+    std::cout << "Flashlight: "
+              << pacman.has<FlashlightComponent>()
+              << std::endl;
 }
 
 void Game::run() {
