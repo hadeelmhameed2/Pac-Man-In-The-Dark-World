@@ -1,39 +1,31 @@
 #include "BatterySystem.h"
 
-void BatterySystem::update(
-    float deltaTime,
-    Entity pacman,
-    std::unordered_map<Entity, BatteryLifeComponent>& batteries,
-    std::unordered_map<Entity, FlashlightComponent>& flashlights
-) {
-    if (!batteries.contains(pacman)) {
-        return;
-    }
+void BatterySystem::update(float deltaTime) {
+    for (bagel::Entity e = bagel::Entity::first();!e.eof();e.next())
+    {
+        if (!e.has<InputComponent>())
+            continue;
 
-    auto& battery = batteries[pacman];
+        auto& battery = e.get<BatteryLifeComponent>();
+        auto& flashlight = e.get<FlashlightComponent>();
 
-    bool flashlightOn = false;
+        bool flashlightOn = flashlight.isOn;
 
-    if (flashlights.contains(pacman)) {
-        flashlightOn = flashlights[pacman].isOn;
-    }
 
-    if (flashlightOn) {
-        battery.current -= battery.flashlightDrainPerSecond * deltaTime;
-    }
-    else {
-        battery.current -= battery.normalDrainPerSecond * deltaTime;
-    }
-
-    if (battery.current <= 0.0f) {
-        battery.current = 0.0f;
-
-        if (flashlights.contains(pacman)) {
-            flashlights[pacman].isOn = false;
+        if (flashlightOn) {
+            battery.current -= battery.flashlightDrainPerSecond * deltaTime;
         }
-    }
+        else {
+            battery.current -= battery.normalDrainPerSecond * deltaTime;
+        }
 
-    if (battery.current > battery.max) {
-        battery.current = battery.max;
+        if (battery.current <= 0.0f) {
+            battery.current = 0.0f;
+            flashlight.isOn = false;
+        }
+
+        if (battery.current > battery.max) {
+            battery.current = battery.max;
+        }
     }
 }

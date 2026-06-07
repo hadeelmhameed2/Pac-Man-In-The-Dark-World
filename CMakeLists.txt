@@ -8,6 +8,7 @@ set(SDL_STATIC ON)
 set(SDL_SHARED OFF)
 
 add_subdirectory(libs/SDL)
+add_subdirectory(libs/box2d/box2d-main)
 
 add_executable(PacmanDarkWorld
         main.cpp
@@ -45,3 +46,6 @@ target_include_directories(PacmanDarkWorld PRIVATE
 target_link_libraries(PacmanDarkWorld PRIVATE
         SDL3-static
 )
+
+target_link_libraries(PacmanDarkWorld PRIVATE
+        box2d)

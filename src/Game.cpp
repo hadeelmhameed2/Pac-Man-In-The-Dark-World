@@ -34,57 +34,110 @@ bool Game::init() {
     }
 
     createPacman();
-
     running = true;
     return true;
 }
 
 void Game::createPacman() {
-    positions[pacman] = PositionComponent{
-        388.0f,
-        690.0f
-    };
 
-    movements[pacman] = MovementComponent{
-        0.0f,
-        0.0f,
-        160.0f
-    };
+    auto pacman = bagel::Entity::create();
 
-    drawings[pacman] = DrawingComponent{
-        32,
-        32,
-        255,
-        255,
-        0,
-        255
-    };
+    pacman.addAll(
+        BatteryLifeComponent{100.0f,100.0f,0.3f,1.2f},
+        FlashlightComponent{false,true},
+        DirectionComponent{Direction::Right},
+        InputComponent{true},
+        PositionComponent{388.0f,690.0f},
+        MovementComponent{0.0f,0.0f,160.0f},
+        DrawingComponent{32,32,255,255,0,255},
+        CollisionComponent{32,32,false}
+    );
 
-    collisions[pacman] = CollisionComponent{
-        32,
-        32,
-        false
-    };
+    std::cout << "\n=== PACMAN COMPONENTS ===\n";
 
-    inputs[pacman] = InputComponent{
-        true
-    };
+    if (pacman.has<PositionComponent>())
+    {
+        auto& p = pacman.get<PositionComponent>();
+        std::cout
+            << "Position: x=" << p.x
+            << " y=" << p.y
+            << std::endl;
+    }
 
-    directions[pacman] = DirectionComponent{
-        Direction::Right
-    };
+    if (pacman.has<MovementComponent>())
+    {
+        auto& m = pacman.get<MovementComponent>();
+        std::cout
+            << "Movement: vx=" << m.vx
+            << " vy=" << m.vy
+            << " speed=" << m.speed
+            << std::endl;
+    }
 
-    flashlights[pacman] = FlashlightComponent{
-        false,
-        true
-    };
+    if (pacman.has<DrawingComponent>())
+    {
+        auto& d = pacman.get<DrawingComponent>();
+        std::cout
+            << "Drawing: w=" << d.width
+            << " h=" << d.height
+            << " rgba=("
+            << (int)d.r << ","
+            << (int)d.g << ","
+            << (int)d.b << ","
+            << (int)d.a << ")"
+            << std::endl;
+    }
 
-    batteries[pacman] = BatteryLifeComponent{
-        100.0f,
-        100.0f,
-        0.3f,
-        1.2f
-    };
+    if (pacman.has<CollisionComponent>())
+    {
+        auto& c = pacman.get<CollisionComponent>();
+        std::cout
+            << "Collision: w=" << c.width
+            << " h=" << c.height
+            << " solid=" << c.isSolid
+            << std::endl;
+    }
+
+    if (pacman.has<DirectionComponent>())
+    {
+        auto& dir = pacman.get<DirectionComponent>();
+        std::cout
+            << "Direction: "
+            << static_cast<int>(dir.current)
+            << std::endl;
+    }
+
+    if (pacman.has<FlashlightComponent>())
+    {
+        auto& f = pacman.get<FlashlightComponent>();
+        std::cout
+            << "Flashlight: on=" << f.isOn
+            << " available=" << f.isAvailable
+            << std::endl;
+    }
+
+    if (pacman.has<BatteryLifeComponent>())
+    {
+        auto& b = pacman.get<BatteryLifeComponent>();
+        std::cout
+            << "Battery: current=" << b.current
+            << " max=" << b.max
+            << " drain=" << b.normalDrainPerSecond
+            << " flashlightDrain=" << b.flashlightDrainPerSecond
+            << std::endl;
+    }
+
+    if (pacman.has<InputComponent>())
+    {
+        auto& i = pacman.get<InputComponent>();
+        std::cout
+            << "Input: controlled="
+            << i.controlledByPlayer
+            << std::endl;
+    }
+
+    std::cout << "=========================\n";
+
 }
 
 void Game::run() {
@@ -97,14 +150,10 @@ void Game::run() {
 
         inputSystem.handleInput(
             running,
-            pacman,
-            movements,
-            directions,
-            flashlights,
-            batteries,
             visionMode
         );
 
+        renderSystem.drawStatus(window,visionMode);
         update(deltaTime);
         render();
 
@@ -113,52 +162,22 @@ void Game::run() {
 }
 
 void Game::update(float deltaTime) {
+
+
     batterySystem.update(
-        deltaTime,
-        pacman,
-        batteries,
-        flashlights
+        deltaTime
     );
 
     movementSystem.update(
-        deltaTime,
-        positions,
-        movements,
-        collisions,
-        WINDOW_WIDTH,
-        WINDOW_HEIGHT
+        deltaTime
     );
 
-    if (batteries.contains(pacman)) {
-        std::string modeText;
 
-        if (visionMode == VisionMode::Full) {
-            modeText = "Full Vision";
-        }
-        else if (visionMode == VisionMode::MediumDark) {
-            modeText = "Medium Darkness";
-        }
-        else {
-            modeText = "Flashlight Only";
-        }
-
-        std::string title =
-            "Pacman in the Dark World | Battery: " +
-            std::to_string(static_cast<int>(batteries[pacman].current)) +
-            "% | Mode: " +
-            modeText;
-
-        SDL_SetWindowTitle(window, title.c_str());
-    }
 }
 
 void Game::render() {
     renderSystem.render(
         renderer,
-        positions,
-        drawings,
-        directions,
-        flashlights,
         visionMode
     );
 }

@@ -5,17 +5,15 @@
 
 #include "Entity.h"
 #include "Components.h"
+#include "bagel.h"
 
 class RenderSystem {
 public:
     void render(
         SDL_Renderer* renderer,
-        std::unordered_map<Entity, PositionComponent>& positions,
-        std::unordered_map<Entity, DrawingComponent>& drawings,
-        std::unordered_map<Entity, DirectionComponent>& directions,
-        std::unordered_map<Entity, FlashlightComponent>& flashlights,
         VisionMode visionMode
     );
+    void drawStatus(SDL_Window* window,VisionMode visionMode);
 
 private:
     void drawMaze(SDL_Renderer* renderer);
