@@ -51,6 +51,7 @@ struct InputComponent {
 
 struct DirectionComponent {
     Direction current = Direction::None;
+    Direction desired = Direction::None;
 };
 
 struct FlashlightComponent {

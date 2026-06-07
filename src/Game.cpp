@@ -86,7 +86,7 @@ void Game::createPacman() {
     pacman.addAll(
         BatteryLifeComponent{100.0f,100.0f,0.3f,1.2f},
         FlashlightComponent{false,true},
-        DirectionComponent{Direction::Right},
+        DirectionComponent{Direction::None, Direction::None},
         InputComponent{true},
         PositionComponent{360.0f,690.0f},
         MovementComponent{0.0f,0.0f,105.0f},

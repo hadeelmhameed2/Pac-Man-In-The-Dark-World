@@ -19,32 +19,23 @@ void InputSystem::handleInput(bool& running, VisionMode& visionMode) {
             {
                     if (!e.has<InputComponent>())
                         continue;
-
-                auto& movement = e.get<MovementComponent>();
+                
                 auto& direction = e.get<DirectionComponent>();
                 auto& flashlight = e.get<FlashlightComponent>();
                 auto& battery = e.get<BatteryLifeComponent>();
 
 
                 if (event.key.key == SDLK_RIGHT) {
-                    movement.vx = movement.speed;
-                    movement.vy = 0.0f;
-                    direction.current = Direction::Right;
+                    direction.desired = Direction::Right;
                 }
                 else if (event.key.key == SDLK_LEFT) {
-                    movement.vx = -movement.speed;
-                    movement.vy = 0.0f;
-                    direction.current = Direction::Left;
+                    direction.desired = Direction::Left;
                 }
                 else if (event.key.key == SDLK_UP) {
-                    movement.vx = 0.0f;
-                    movement.vy = -movement.speed;
-                    direction.current = Direction::Up;
+                    direction.desired = Direction::Up;
                 }
                 else if (event.key.key == SDLK_DOWN) {
-                    movement.vx = 0.0f;
-                    movement.vy = movement.speed;
-                    direction.current = Direction::Down;
+                    direction.desired = Direction::Down;
                 }
                 else if (event.key.key == 'f' || event.key.key == 'F') {
                     if (
