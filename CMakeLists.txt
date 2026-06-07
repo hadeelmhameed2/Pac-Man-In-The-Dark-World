@@ -15,14 +15,23 @@ add_executable(PacmanDarkWorld
         src/Game.h
         src/Game.cpp
         src/Constants.h
+        src/GridMovement.h
 
-        ecs/Entity.h
+        ecs/bagel.h
         ecs/Components.h
+
+        Systems/GameStateSystem.h
+        Systems/GameStateSystem.cpp
+        Systems/GhostAISystem.h
+        Systems/GhostAISystem.cpp
+        Systems/VisibilitySystem.h
+        Systems/VisibilitySystem.cpp
 )
 
 target_include_directories(PacmanDarkWorld PRIVATE
         src
         ecs
+        Systems
         libs/SDL/include
 )
 

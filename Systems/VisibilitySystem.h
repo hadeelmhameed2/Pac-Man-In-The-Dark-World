@@ -4,5 +4,5 @@
 
 class VisibilitySystem {
 public:
-    static void update(bagel::ent_type pacmanId, bagel::ent_type gameStateId);
+    static void update(bagel::ent_type pacmanId, bagel::ent_type gameStateId, float deltaTime);
 };

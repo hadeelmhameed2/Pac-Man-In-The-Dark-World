@@ -36,9 +36,11 @@ struct InputComponent {
 enum class GhostState { CHASE, SCATTER, FRIGHTENED, EATEN };
 
 struct GhostAI {
-    GhostState state;
-    SDL_FPoint target;
-    int ghostType;          // 0: Blinky, 1: Pinky, 2: Inky, 3: Clyde
+    GhostState state = GhostState::SCATTER;
+    SDL_FPoint target{};
+    int ghostType = 0;          // 0: Blinky, 1: Pinky, 2: Inky, 3: Clyde
+    int lastTurnTileCol = -1;
+    int lastTurnTileRow = -1;
 };
 
 struct VisibilityComponent {
@@ -50,6 +52,8 @@ struct GameStateComponent {
     float batteryLevel = 100.0f;
     int score = 0;
     bool isGameOver = false;
+    bool isLowBattery = false;
+    int nearbyGhosts = 0;
 };
 
 template <> struct bagel::Storage<GhostAI> final : NoInstance {

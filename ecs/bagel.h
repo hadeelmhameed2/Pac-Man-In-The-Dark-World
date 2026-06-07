@@ -7,11 +7,13 @@
 #include <cstdlib>
 #include <cstdint>
 #include <type_traits>
+#include <algorithm>
+#include <bit>
 
 namespace bagel
 {
 	/**** Parameters ****/
-	inline constexpr int	MaxComponents = 6;
+	inline constexpr int	MaxComponents = 8;
 	inline constexpr bool	DynamicBags = true;
 	inline constexpr int	IdBagSize = 10;
 	inline constexpr int	InitialEntities = 100;

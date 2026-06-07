@@ -1,9 +1,8 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <unordered_map>
 
-#include "Entity.h"
+#include "bagel.h"
 #include "Components.h"
 
 class Game {
@@ -18,6 +17,9 @@ private:
     void render();
 
     void createPacman();
+    void createGameState();
+    void createGhosts();
+    void updateSystems(float deltaTime);
 
 private:
     SDL_Window* window = nullptr;
@@ -25,11 +27,6 @@ private:
 
     bool running = false;
 
-    Entity pacman = 1;
-
-    std::unordered_map<Entity, PositionComponent> positions;
-    std::unordered_map<Entity, MovementComponent> movements;
-    std::unordered_map<Entity, DrawingComponent> drawings;
-    std::unordered_map<Entity, CollisionComponent> collisions;
-    std::unordered_map<Entity, InputComponent> inputs;
+    bagel::ent_type pacman{};
+    bagel::ent_type gameStateId{};
 };

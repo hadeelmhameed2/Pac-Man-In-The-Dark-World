@@ -1,48 +1,59 @@
 #include "VisibilitySystem.h"
+#include "Constants.h"
 #include <cmath>
+#include <algorithm>
 
-void VisibilitySystem::update(bagel::ent_type pacmanId, bagel::ent_type gameStateId) {
+void VisibilitySystem::update(bagel::ent_type pacmanId, bagel::ent_type gameStateId, float deltaTime) {
     static const bagel::Mask mask = bagel::MaskBuilder()
         .set<PositionComponent>()
         .set<VisibilityComponent>()
         .build();
 
     static int q = bagel::World::createQuery(mask);
+    static float pulseTimer = 0.0f;
+    pulseTimer += deltaTime;
 
     const auto& pacPos = bagel::World::getComponent<PositionComponent>(pacmanId);
     const auto& gameState = bagel::World::getComponent<GameStateComponent>(gameStateId);
-    const auto& pacMove = bagel::World::getComponent<MovementComponent>(pacmanId);
 
-    float lightRadius = 150.0f * (gameState.batteryLevel / 100.0f);
-    float fadeMargin = 40.0f;
+    const float pacCenterX = pacPos.x + TILE_SIZE * 0.5f;
+    const float pacCenterY = pacPos.y + TILE_SIZE * 0.5f;
+
+    float lightRadius = LIGHT_RADIUS * (gameState.batteryLevel / 100.0f);
+    if (gameState.isGameOver) {
+        lightRadius = LIGHT_RADIUS * 0.25f;
+    } else if (gameState.isLowBattery) {
+        const float flicker = 0.85f + 0.15f * std::sin(pulseTimer * 8.0f);
+        lightRadius *= flicker;
+    }
+
+    const float fadeMargin = LIGHT_FADE_MARGIN;
+    const float smoothSpeed = 6.0f * deltaTime;
 
     for (bagel::Entity e = bagel::World::first(q); !bagel::World::eof(q); e = bagel::World::next(q)) {
         auto& vis = e.get<VisibilityComponent>();
         const auto& entPos = e.get<PositionComponent>();
 
-        float dx = entPos.x - pacPos.x;
-        float dy = entPos.y - pacPos.y;
-        float dist = std::sqrt(dx * dx + dy * dy);
+        const float entCenterX = entPos.x + TILE_SIZE * 0.5f;
+        const float entCenterY = entPos.y + TILE_SIZE * 0.5f;
+        const float dx = entCenterX - pacCenterX;
+        const float dy = entCenterY - pacCenterY;
+        const float dist = std::sqrt(dx * dx + dy * dy);
 
-        float glowOpacity = 0.0f;
+        float litAmount = 0.0f;
         if (dist < lightRadius) {
-            glowOpacity = 1.0f;
+            litAmount = 1.0f;
         } else if (dist < lightRadius + fadeMargin) {
-            glowOpacity = 1.0f - ((dist - lightRadius) / fadeMargin);
+            litAmount = 1.0f - ((dist - lightRadius) / fadeMargin);
         }
 
-        float flashOpacity = 0.0f;
-        if (pacMove.vx != 0 || pacMove.vy != 0) {
-            float mag = std::sqrt(pacMove.vx * pacMove.vx + pacMove.vy * pacMove.vy);
-            float dot = (dx / dist) * (pacMove.vx / mag) + (dy / dist) * (pacMove.vy / mag);
-
-            if (dot > 0.70f && dist < lightRadius * 2.5f) {
-                flashOpacity = (dot - 0.70f) / (1.0f - 0.70f);
-                flashOpacity *= (1.0f - (dist / (lightRadius * 2.5f)));
-            }
+        if (dist <= GHOST_NEAR_DISTANCE) {
+            const float dangerPulse = 0.15f * std::sin(pulseTimer * 12.0f);
+            litAmount = std::min(1.0f, litAmount + 0.25f + dangerPulse);
         }
 
-        vis.opacity = std::max(glowOpacity, flashOpacity);
-        vis.isVisible = (vis.opacity > 0.01f);
+        const float targetOpacity = GHOST_MIN_OPACITY + litAmount * (1.0f - GHOST_MIN_OPACITY);
+        vis.opacity += (targetOpacity - vis.opacity) * std::min(1.0f, smoothSpeed);
+        vis.isVisible = true;
     }
 }
