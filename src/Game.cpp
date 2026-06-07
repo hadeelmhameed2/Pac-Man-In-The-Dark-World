@@ -34,8 +34,49 @@ bool Game::init() {
     }
 
     createPacman();
+    createWalls();
     running = true;
     return true;
+}
+
+void Game::createWalls()
+{
+    const float startX = 70.0f;
+    const float startY = 55.0f;
+
+    int count=0;
+
+    for (int row = 0; row < static_cast<int>(maze.size()); ++row)
+    {
+        for (int col = 0; col < static_cast<int>(maze[row].size()); ++col)
+        {
+            if (maze[row][col] != '#')
+                continue;
+
+            float x = startX + col * WALL_SIZE;
+            float y = startY + row * WALL_SIZE;
+
+            bagel::Entity wall = bagel::Entity::create();
+
+            wall.addAll(
+                WallComponent{},
+
+                PositionComponent{
+                    x,
+                    y
+                },
+
+                CollisionComponent{
+                    static_cast<int>(WALL_SIZE),
+                    static_cast<int>(WALL_SIZE),
+                    true
+                }
+            );
+            std::cout<<count++<<std::endl;
+        }
+    }
+
+    std::cout << "\n=== Wall Created ===\n";
 }
 
 void Game::createPacman() {
@@ -47,10 +88,10 @@ void Game::createPacman() {
         FlashlightComponent{false,true},
         DirectionComponent{Direction::Right},
         InputComponent{true},
-        PositionComponent{388.0f,690.0f},
-        MovementComponent{0.0f,0.0f,160.0f},
-        DrawingComponent{32,32,255,255,0,255},
-        CollisionComponent{32,32,false}
+        PositionComponent{360.0f,690.0f},
+        MovementComponent{0.0f,0.0f,105.0f},
+        DrawingComponent{20,20,255,255,0,255},
+        CollisionComponent{20,20,false}
     );
 
     std::cout << "\n=== PACMAN COMPONENTS ===\n";

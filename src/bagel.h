@@ -15,8 +15,8 @@ namespace bagel
 	inline constexpr int	MaxComponents = 32;
 	inline constexpr bool	DynamicBags = false;
 	inline constexpr int	IdBagSize = 10;
-	inline constexpr int	InitialEntities = 100;
-	inline constexpr int	InitialPackedSize = 50;
+	inline constexpr int	InitialEntities = 1000;
+	inline constexpr int	InitialPackedSize = 1000;
 	inline constexpr bool	CallbackOnDelete = false;
 	/** end parameters **/
 

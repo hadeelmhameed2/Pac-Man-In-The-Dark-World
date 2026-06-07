@@ -21,6 +21,8 @@ struct PositionComponent {
     float y = 0.0f;
 };
 
+
+
 struct MovementComponent {
     float vx = 0.0f;
     float vy = 0.0f;
@@ -63,3 +65,5 @@ struct BatteryLifeComponent {
     float normalDrainPerSecond = 0.3f;
     float flashlightDrainPerSecond = 1.2f;
 };
+
+struct WallComponent{};

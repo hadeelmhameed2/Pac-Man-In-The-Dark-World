@@ -23,19 +23,51 @@ void MovementSystem::update(
 
         auto& position = e.get<PositionComponent>();
         auto& movement = e.get<MovementComponent>();
+        auto& collision = e.get<CollisionComponent>();
 
-        std::cout <<"Positions: "<<position.x << "   " <<position.y << std::endl;
+        int width = collision.width;
+        int height = collision.height;
+
+        float oldX = position.x;
+        float oldY = position.y;
+
         position.x += movement.vx * deltaTime;
         position.y += movement.vy * deltaTime;
 
-        int width = 32;
-        int height = 32;
+        position.x += movement.vx * deltaTime;
+        position.y += movement.vy * deltaTime;
 
-        if (e.has<CollisionComponent>())
-        {
-            auto& collision = e.get<CollisionComponent>();
-            width = collision.width;
-            height = collision.height;
+        static const bagel::Mask wallMask =
+            bagel::MaskBuilder()
+        .set<WallComponent>()
+        .set<PositionComponent>()
+        .set<CollisionComponent>()
+        .build();
+
+        for (bagel::Entity e1 = bagel::Entity::first();!e1.eof(); e1.next()) {
+            if (!e1.test(wallMask))
+                continue;
+
+            auto& positionwall = e1.get<PositionComponent>();
+            auto& collisionwall = e1.get<CollisionComponent>();
+
+            int widthwall = collisionwall.width;
+            int heightwall = collisionwall.height;
+
+            bool overlapx =
+            position.x < positionwall.x + widthwall &&
+            position.x + width > positionwall.x;
+
+            bool overlapy =
+            position.y < positionwall.y + heightwall &&
+            position.y + height > positionwall.y;
+
+            if (overlapx && overlapy)
+            {
+                position.x = oldX;
+                position.y = oldY;
+                break;
+            }
         }
 
         if (position.x < mazeLeft)

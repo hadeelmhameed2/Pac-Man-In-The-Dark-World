@@ -244,13 +244,13 @@ void RenderSystem::drawDots(SDL_Renderer* renderer) {
 }
 
 void RenderSystem::drawGhosts(SDL_Renderer* renderer) {
-    drawGhost(renderer, 396, 370, 255, 0, 0);
-    drawGhost(renderer, 432, 370, 255, 120, 200);
-    drawGhost(renderer, 468, 370, 0, 180, 255);
-    drawGhost(renderer, 360, 370, 255, 150, 0);
+    drawGhost(renderer, 375, 370, 255, 0, 0);
+    drawGhost(renderer, 412, 370, 255, 120, 200);
+    drawGhost(renderer, 448, 370, 0, 180, 255);
+    drawGhost(renderer, 340, 370, 255, 150, 0);
 }
 
-void RenderSystem::drawGhost(
+/*void RenderSystem::drawGhost(
     SDL_Renderer* renderer,
     float x,
     float y,
@@ -270,6 +270,30 @@ void RenderSystem::drawGhost(
 
     drawFilledCircle(renderer, x + 10, y + 12, 2, 0, 0, 40, 255);
     drawFilledCircle(renderer, x + 21, y + 12, 2, 0, 0, 40, 255);
+}*/
+
+void RenderSystem::drawGhost(
+    SDL_Renderer* renderer,
+    float x,
+    float y,
+    Uint8 r,
+    Uint8 g,
+    Uint8 b
+) {
+    constexpr float s = 0.7f;
+
+    drawFilledCircle(renderer, x + 14*s, y + 12*s, 14*s, r, g, b, 255);
+    drawFilledRect(renderer, x, y + 12*s, 28*s, 18*s, r, g, b, 255);
+
+    drawFilledCircle(renderer, x + 5*s,  y + 30*s, 5*s, r, g, b, 255);
+    drawFilledCircle(renderer, x + 14*s, y + 30*s, 5*s, r, g, b, 255);
+    drawFilledCircle(renderer, x + 23*s, y + 30*s, 5*s, r, g, b, 255);
+
+    drawFilledCircle(renderer, x + 9*s,  y + 12*s, 4*s, 255, 255, 255, 255);
+    drawFilledCircle(renderer, x + 20*s, y + 12*s, 4*s, 255, 255, 255, 255);
+
+    drawFilledCircle(renderer, x + 10*s, y + 12*s, 2*s, 0, 0, 40, 255);
+    drawFilledCircle(renderer, x + 21*s, y + 12*s, 2*s, 0, 0, 40, 255);
 }
 
 void RenderSystem::drawStatus(SDL_Window *window,VisionMode visionMode) {
