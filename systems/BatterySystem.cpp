@@ -1,33 +1,31 @@
 #include "BatterySystem.h"
 
-void BatterySystem::update(
-    float deltaTime,
-    bagel::Entity pacman
-) {
+void BatterySystem::update(float deltaTime) {
+    for (bagel::Entity e = bagel::Entity::first();!e.eof();e.next())
+    {
+        if (!e.has<InputComponent>())
+            continue;
+
+        auto& battery = e.get<BatteryLifeComponent>();
+        auto& flashlight = e.get<FlashlightComponent>();
+
+        bool flashlightOn = flashlight.isOn;
 
 
-    auto& battery =
-    pacman.get<BatteryLifeComponent>();
+        if (flashlightOn) {
+            battery.current -= battery.flashlightDrainPerSecond * deltaTime;
+        }
+        else {
+            battery.current -= battery.normalDrainPerSecond * deltaTime;
+        }
 
-    auto& flashlight =
-        pacman.get<FlashlightComponent>();
+        if (battery.current <= 0.0f) {
+            battery.current = 0.0f;
+            flashlight.isOn = false;
+        }
 
-    bool flashlightOn = flashlight.isOn;
-
-
-    if (flashlightOn) {
-        battery.current -= battery.flashlightDrainPerSecond * deltaTime;
-    }
-    else {
-        battery.current -= battery.normalDrainPerSecond * deltaTime;
-    }
-
-    if (battery.current <= 0.0f) {
-        battery.current = 0.0f;
-        flashlight.isOn = false;
-    }
-
-    if (battery.current > battery.max) {
-        battery.current = battery.max;
+        if (battery.current > battery.max) {
+            battery.current = battery.max;
+        }
     }
 }

@@ -1,9 +1,7 @@
 #include "MovementSystem.h"
 
 void MovementSystem::update(
-    float deltaTime,
-    int windowWidth,
-    int windowHeight
+    float deltaTime
 ) {
     const float mazeLeft = 70.0f;
     const float mazeTop = 55.0f;
@@ -26,6 +24,7 @@ void MovementSystem::update(
         auto& position = e.get<PositionComponent>();
         auto& movement = e.get<MovementComponent>();
 
+        std::cout <<"Positions: "<<position.x << "   " <<position.y << std::endl;
         position.x += movement.vx * deltaTime;
         position.y += movement.vy * deltaTime;
 
@@ -58,5 +57,6 @@ void MovementSystem::update(
         {
             position.y = mazeBottom - height;
         }
+
     }
 }

@@ -12,8 +12,8 @@
 namespace bagel
 {
 	/**** Parameters ****/
-	inline constexpr int	MaxComponents = 6;
-	inline constexpr bool	DynamicBags = true;
+	inline constexpr int	MaxComponents = 32;
+	inline constexpr bool	DynamicBags = false;
 	inline constexpr int	IdBagSize = 10;
 	inline constexpr int	InitialEntities = 100;
 	inline constexpr int	InitialPackedSize = 50;
@@ -125,13 +125,6 @@ namespace bagel
 	public:
 		static void add(const ent_type ent, const T& val) {
 
-			std::cout
-	   << "ADD entity="
-	   << ent.id
-	   << " compIndex="
-	   << _comps.size()
-	   << std::endl;
-
 			_idToComp.ensure(ent.id+1);
 			_idToComp[ent.id] = _comps.size();
 			_comps.push(val);
@@ -148,15 +141,6 @@ namespace bagel
 		static T& get(const ent_type ent)
 		{
 			int idx = _idToComp[ent.id];
-
-			std::cout
-				<< "GET "
-				<< typeid(T).name()
-				<< " entity=" << ent.id
-				<< " idx=" << idx
-				<< " compsize=" << _comps.size()
-				<< std::endl;
-
 			return _comps[idx];
 		}
 	private:

@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 
+
 void RenderSystem::render(
     SDL_Renderer* renderer,
     VisionMode visionMode
@@ -27,16 +28,15 @@ void RenderSystem::render(
         .build();
 
     static const bagel::Mask pacmanMask =
-        bagel::MaskBuilder()
-            .set<PositionComponent>()
-            .set<DrawingComponent>()
-            .set<DirectionComponent>()
-            .build();
+    bagel::MaskBuilder()
+        .set<InputComponent>()
+        .set<PositionComponent>()
+        .set<DrawingComponent>()
+        .set<DirectionComponent>()
+        .build();
 
 // Draw entities
-for (bagel::Entity e = bagel::Entity::first();
-     !e.eof();
-     e.next())
+for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next())
 {
     if (!e.test(drawMask))
         continue;
@@ -44,16 +44,10 @@ for (bagel::Entity e = bagel::Entity::first();
     auto& position = e.get<PositionComponent>();
     auto& drawing  = e.get<DrawingComponent>();
 
-    if (e.has<DirectionComponent>())
+    if (e.has<InputComponent>()) //player
     {
         auto& direction = e.get<DirectionComponent>();
-
-        drawPacman(
-            renderer,
-            position,
-            drawing,
-            direction
-        );
+        drawPacman(renderer,position,drawing,direction);
 
         if (e.has<FlashlightComponent>())
         {
@@ -93,9 +87,7 @@ for (bagel::Entity e = bagel::Entity::first();
 }
 
 // Darkness / flashlight effects
-for (bagel::Entity e = bagel::Entity::first();
-     !e.eof();
-     e.next())
+for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next())
 {
     if (!e.test(pacmanMask))
         continue;

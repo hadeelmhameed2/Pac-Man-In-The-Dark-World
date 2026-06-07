@@ -9,8 +9,6 @@
 class MovementSystem {
 public:
     void update(
-        float deltaTime,
-        int windowWidth,
-        int windowHeight
+        float deltaTime
     );
 };
