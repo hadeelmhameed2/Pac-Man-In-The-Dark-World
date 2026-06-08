@@ -26,25 +26,47 @@ void InputSystem::handleInput(bool& running, VisionMode& visionMode) {
                 auto& battery = e.get<BatteryLifeComponent>();
 
 
+                bool isOpposite = false;
+                Direction req = Direction::None;
                 if (event.key.key == SDLK_RIGHT) {
-                    movement.vx = movement.speed;
-                    movement.vy = 0.0f;
-                    direction.current = Direction::Right;
+                    req = Direction::Right;
+                    isOpposite = (direction.current == Direction::Left);
                 }
                 else if (event.key.key == SDLK_LEFT) {
-                    movement.vx = -movement.speed;
-                    movement.vy = 0.0f;
-                    direction.current = Direction::Left;
+                    req = Direction::Left;
+                    isOpposite = (direction.current == Direction::Right);
                 }
                 else if (event.key.key == SDLK_UP) {
-                    movement.vx = 0.0f;
-                    movement.vy = -movement.speed;
-                    direction.current = Direction::Up;
+                    req = Direction::Up;
+                    isOpposite = (direction.current == Direction::Down);
                 }
                 else if (event.key.key == SDLK_DOWN) {
-                    movement.vx = 0.0f;
-                    movement.vy = movement.speed;
-                    direction.current = Direction::Down;
+                    req = Direction::Down;
+                    isOpposite = (direction.current == Direction::Up);
+                }
+
+                if (req != Direction::None) {
+                    direction.queued = req;
+                    if (direction.current == Direction::None || isOpposite) {
+                        direction.current = req;
+                        direction.queued = Direction::None;
+                        if (req == Direction::Right) {
+                            movement.vx = movement.speed;
+                            movement.vy = 0.0f;
+                        }
+                        else if (req == Direction::Left) {
+                            movement.vx = -movement.speed;
+                            movement.vy = 0.0f;
+                        }
+                        else if (req == Direction::Up) {
+                            movement.vx = 0.0f;
+                            movement.vy = -movement.speed;
+                        }
+                        else if (req == Direction::Down) {
+                            movement.vx = 0.0f;
+                            movement.vy = movement.speed;
+                        }
+                    }
                 }
                 else if (event.key.key == 'f' || event.key.key == 'F') {
                     if (

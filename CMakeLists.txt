@@ -16,36 +16,36 @@ add_executable(PacmanDarkWorld
         src/Game.h
         src/Game.cpp
         src/Constants.h
+        src/GridMovement.h
 
-        ecs/Entity.h
+        ecs/bagel.h
         ecs/Components.h
 
-        systems/InputSystem.h
-        systems/InputSystem.cpp
-        systems/MovementSystem.h
-        systems/MovementSystem.cpp
-        systems/RenderSystem.h
-        systems/RenderSystem.cpp
-        systems/InputSystem.h
-        systems/InputSystem.cpp
-        systems/MovementSystem.h
-        systems/MovementSystem.cpp
-        systems/RenderSystem.h
-        systems/RenderSystem.cpp
-        systems/BatterySystem.h
-        systems/BatterySystem.cpp
+        Systems/InputSystem.h
+        Systems/InputSystem.cpp
+        Systems/MovementSystem.h
+        Systems/MovementSystem.cpp
+        Systems/RenderSystem.h
+        Systems/RenderSystem.cpp
+        Systems/BatterySystem.h
+        Systems/BatterySystem.cpp
+        Systems/GameStateSystem.h
+        Systems/GameStateSystem.cpp
+        Systems/GhostAISystem.h
+        Systems/GhostAISystem.cpp
+        Systems/VisibilitySystem.h
+        Systems/VisibilitySystem.cpp
 )
 
 target_include_directories(PacmanDarkWorld PRIVATE
-        src
         ecs
-        systems
+        src
+        Systems
         libs/SDL/include
+        libs/box2d/box2d-main/include
 )
 
 target_link_libraries(PacmanDarkWorld PRIVATE
         SDL3-static
+        box2d
 )
-
-target_link_libraries(PacmanDarkWorld PRIVATE
-        box2d)

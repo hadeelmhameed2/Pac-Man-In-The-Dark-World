@@ -11,31 +11,6 @@
 #include "RenderSystem.h"
 #include "BatterySystem.h"
 
-
-template <> struct bagel::Storage<MovementComponent> final :NoInstance {
-    using type = PackedStorage<MovementComponent>;
-};
-
-
-template <> struct bagel::Storage<CollisionComponent> final :NoInstance {
-    using type = PackedStorage<CollisionComponent>;
-};
-
-template <> struct bagel::Storage<DrawingComponent> final :NoInstance {
-    using type = PackedStorage<DrawingComponent>;
-};
-
-template <> struct bagel::Storage<PositionComponent> final :NoInstance {
-    using type = PackedStorage<PositionComponent>;
-};
-
-template <> struct bagel::Storage<DirectionComponent> final : NoInstance {
-    using type = PackedStorage<DirectionComponent>;
-};
-
-
-
-
 class Game {
 public:
     bool init();
@@ -44,8 +19,11 @@ public:
 
 private:
     void update(float deltaTime);
-    void render();
     void createPacman();
+    void createGameState();
+    void createGhosts();
+    void updateSystems(float deltaTime);
+    void applyGhostGridMovement();
 
 private:
     SDL_Window* window = nullptr;
@@ -53,8 +31,13 @@ private:
 
     bool running = false;
     VisionMode visionMode = VisionMode::Full;
+
     InputSystem inputSystem;
     MovementSystem movementSystem;
     RenderSystem renderSystem;
     BatterySystem batterySystem;
+
+    bagel::ent_type pacman{};
+    bagel::ent_type gameStateId{};
+    b2WorldId worldId{};
 };

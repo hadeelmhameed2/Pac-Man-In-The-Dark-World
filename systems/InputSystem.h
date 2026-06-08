@@ -2,7 +2,6 @@
 
 #include <SDL3/SDL.h>
 
-#include "Entity.h"
 #include "bagel.h"
 #include "Components.h"
 

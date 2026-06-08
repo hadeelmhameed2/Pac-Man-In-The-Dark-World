@@ -7,13 +7,14 @@
 #include <cstdlib>
 #include <cstdint>
 #include <type_traits>
-#include <iostream>
+#include <algorithm>
+#include <bit>
 
 namespace bagel
 {
 	/**** Parameters ****/
-	inline constexpr int	MaxComponents = 32;
-	inline constexpr bool	DynamicBags = false;
+	inline constexpr int	MaxComponents = 16;
+	inline constexpr bool	DynamicBags = true;
 	inline constexpr int	IdBagSize = 10;
 	inline constexpr int	InitialEntities = 100;
 	inline constexpr int	InitialPackedSize = 50;
@@ -124,7 +125,6 @@ namespace bagel
 	{
 	public:
 		static void add(const ent_type ent, const T& val) {
-
 			_idToComp.ensure(ent.id+1);
 			_idToComp[ent.id] = _comps.size();
 			_comps.push(val);
@@ -138,10 +138,8 @@ namespace bagel
 			_compToId[idx] = last;
 			_idToComp[last] = idx;
 		}
-		static T& get(const ent_type ent)
-		{
-			int idx = _idToComp[ent.id];
-			return _comps[idx];
+		static T& get(const ent_type ent) {
+			return _comps[_idToComp[ent.id]];
 		}
 	private:
 		static inline Bag<T,InitialPackedSize> _comps;

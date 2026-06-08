@@ -1,11 +1,8 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <unordered_map>
-
-#include "Entity.h"
-#include "Components.h"
 #include "bagel.h"
+#include "Components.h"
 
 class RenderSystem {
 public:
@@ -18,8 +15,6 @@ public:
 private:
     void drawMaze(SDL_Renderer* renderer);
     void drawDots(SDL_Renderer* renderer);
-    void drawGhosts(SDL_Renderer* renderer);
-
     void drawPacman(
         SDL_Renderer* renderer,
         const PositionComponent& position,
@@ -40,7 +35,8 @@ private:
         float y,
         Uint8 r,
         Uint8 g,
-        Uint8 b
+        Uint8 b,
+        Uint8 a = 255
     );
 
     void drawDarkOverlay(SDL_Renderer* renderer, Uint8 alpha);
