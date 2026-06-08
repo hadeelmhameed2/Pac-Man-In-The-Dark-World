@@ -1,6 +1,8 @@
 #include "GameStateSystem.h"
 #include "Constants.h"
+#include "Maze.h"
 #include <cmath>
+#include <algorithm>
 
 namespace {
     float entityCenterX(float x) {
@@ -41,6 +43,113 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
     const auto& pacPos = bagel::World::getComponent<PositionComponent>(pacmanId);
     const float pacCenterX = entityCenterX(pacPos.x);
     const float pacCenterY = entityCenterY(pacPos.y);
+
+    // 1. Calculate Pacman's current tile coordinates
+    const float pacCenterX_logical = pacPos.x + 16.0f;
+    const float pacCenterY_logical = pacPos.y + 16.0f;
+    int pacCol = static_cast<int>(std::floor((pacCenterX_logical - MAZE_START_X) / MAZE_TILE_SIZE));
+    int pacRow = static_cast<int>(std::floor((pacCenterY_logical - MAZE_START_Y) / MAZE_TILE_SIZE));
+
+    static float frightenedTimer = 0.0f;
+    static float invincibilityTimer = 0.0f;
+
+    if (frightenedTimer > 0.0f) {
+        frightenedTimer -= deltaTime;
+    }
+    if (invincibilityTimer > 0.0f) {
+        invincibilityTimer -= deltaTime;
+    }
+
+    GameStateComponent* statePtr = nullptr;
+    if (!bagel::World::eof(stateQ)) {
+        bagel::Entity stateEnt = bagel::World::first(stateQ);
+        statePtr = &stateEnt.get<GameStateComponent>();
+    }
+
+    if (statePtr != nullptr && !statePtr->isGameOver) {
+        // 2. Dot & Energizer eating
+        if (pacRow >= 0 && pacRow < MAZE_ROWS && pacCol >= 0 && pacCol < MAZE_COLS) {
+            char& cell = MAZE_LAYOUT[pacRow][pacCol];
+            if (cell == '.') {
+                cell = ' ';
+                statePtr->score += 10;
+            } else if (cell == 'o') {
+                cell = ' ';
+                statePtr->score += 50;
+                frightenedTimer = 7.0f; // Frightened mode lasts 7 seconds
+            }
+        }
+
+        // 3. Set ghost state to Frightened if timer is active
+        for (bagel::Entity ghost = bagel::World::first(ghostQ); !bagel::World::eof(ghostQ); ghost = bagel::World::next(ghostQ)) {
+            auto& ai = ghost.get<GhostAI>();
+            if (frightenedTimer > 0.0f) {
+                if (ai.state != GhostState::EATEN) {
+                    ai.state = GhostState::FRIGHTENED;
+                }
+            } else {
+                if (ai.state == GhostState::FRIGHTENED) {
+                    ai.state = GhostState::SCATTER; // Fallback to normal behavior
+                }
+            }
+        }
+
+        // 4. Ghost-Pacman collisions
+        for (bagel::Entity ghost = bagel::World::first(ghostQ); !bagel::World::eof(ghostQ); ghost = bagel::World::next(ghostQ)) {
+            auto& ghostPos = ghost.get<PositionComponent>();
+            auto& ai = ghost.get<GhostAI>();
+            const float ghostCenterX_logical = ghostPos.x + 16.0f;
+            const float ghostCenterY_logical = ghostPos.y + 16.0f;
+
+            const float dx = ghostCenterX_logical - pacCenterX_logical;
+            const float dy = ghostCenterY_logical - pacCenterY_logical;
+            const float dist = std::sqrt(dx * dx + dy * dy);
+
+            if (dist < 24.0f) {
+                if (ai.state == GhostState::FRIGHTENED) {
+                    // Pacman eats the ghost
+                    ai.state = GhostState::EATEN;
+                    statePtr->score += 200;
+
+                    // Send the ghost back to the ghost house
+                    ghostPos.x = GHOST_HOUSE_X - 16.0f;
+                    ghostPos.y = GHOST_HOUSE_Y - 16.0f;
+
+                    auto& ghostMove = ghost.get<MovementComponent>();
+                    ghostMove.vx = 0.0f;
+                    ghostMove.vy = 0.0f;
+                }
+                else if (ai.state == GhostState::CHASE || ai.state == GhostState::SCATTER) {
+                    // Normal ghost damage to Pacman
+                    if (invincibilityTimer <= 0.0f) {
+                        if (bagel::World::mask(pacmanId).test(bagel::Component<BatteryLifeComponent>::Bit)) {
+                            auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
+                            battery.current -= 35.0f; // Lose 35% battery
+                            if (battery.current < 0.0f) {
+                                battery.current = 0.0f;
+                            }
+                        }
+                        invincibilityTimer = 2.0f; // 2 seconds invincibility frame
+                    }
+                }
+            }
+        }
+
+        // 5. Victory check (all dots eaten)
+        int remainingDots = 0;
+        for (int r = 0; r < MAZE_ROWS; ++r) {
+            for (int c = 0; c < MAZE_COLS; ++c) {
+                if (MAZE_LAYOUT[r][c] == '.' || MAZE_LAYOUT[r][c] == 'o') {
+                    remainingDots++;
+                }
+            }
+        }
+
+        if (remainingDots == 0) {
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Victory!", "Congratulations! You ate all the dots and won!", nullptr);
+            statePtr->isGameOver = true;
+        }
+    }
 
     int nearbyGhosts = 0;
     for (bagel::Entity ghost = bagel::World::first(ghostQ); !bagel::World::eof(ghostQ); ghost = bagel::World::next(ghostQ)) {

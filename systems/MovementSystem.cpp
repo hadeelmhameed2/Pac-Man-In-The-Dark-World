@@ -114,23 +114,27 @@ void MovementSystem::update(
             height = collision.height;
         }
 
-        if (position.x < mazeLeft)
-        {
-            position.x = mazeLeft;
+        // Handle wrapping in side tunnels (row 14)
+        if (std::abs(position.y - 387.0f) < 5.0f) {
+            if (position.x + 16.0f < 70.0f) {
+                position.x = 742.0f - 16.0f;
+            } else if (position.x + 16.0f > 742.0f) {
+                position.x = 70.0f - 16.0f;
+            }
+        } else {
+            if (position.x < mazeLeft) {
+                position.x = mazeLeft;
+            }
+            if (position.x + width > mazeRight) {
+                position.x = mazeRight - width;
+            }
         }
 
-        if (position.y < mazeTop)
-        {
+        if (position.y < mazeTop) {
             position.y = mazeTop;
         }
 
-        if (position.x + width > mazeRight)
-        {
-            position.x = mazeRight - width;
-        }
-
-        if (position.y + height > mazeBottom)
-        {
+        if (position.y + height > mazeBottom) {
             position.y = mazeBottom - height;
         }
 

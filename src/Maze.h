@@ -8,7 +8,7 @@ constexpr float MAZE_START_X = 70.0f;
 constexpr float MAZE_START_Y = 55.0f;
 constexpr float MAZE_TILE_SIZE = 24.0f;
 
-inline const std::vector<std::string> MAZE_LAYOUT = {
+inline std::vector<std::string> MAZE_LAYOUT = {
     "############################",
     "#............##............#",
     "#.####.#####.##.#####.####.#",
@@ -42,6 +42,9 @@ inline const std::vector<std::string> MAZE_LAYOUT = {
 };
 
 inline bool isWall(int col, int row) {
+    if (row == 14 && (col < 0 || col >= MAZE_COLS)) {
+        return false; // Tunnel wrap area
+    }
     if (row < 0 || row >= MAZE_ROWS || col < 0 || col >= MAZE_COLS) {
         return true;
     }

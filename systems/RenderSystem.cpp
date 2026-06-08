@@ -440,10 +440,19 @@ void RenderSystem::drawGhost(
 }
 
 void RenderSystem::drawStatus(SDL_Window *window,VisionMode visionMode) {
-
     static const bagel::Mask mask = bagel::MaskBuilder()
             .set<BatteryLifeComponent>()
             .build();
+    static const bagel::Mask stateMask = bagel::MaskBuilder()
+            .set<GameStateComponent>()
+            .build();
+    static int stateQ = bagel::World::createQuery(stateMask);
+
+    int score = 0;
+    if (!bagel::World::eof(stateQ)) {
+        bagel::Entity stateEnt = bagel::World::first(stateQ);
+        score = stateEnt.get<GameStateComponent>().score;
+    }
 
     for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next()) {
         if (e.test(mask)) {
@@ -462,15 +471,15 @@ void RenderSystem::drawStatus(SDL_Window *window,VisionMode visionMode) {
             std::string title =
                 "Pacman in the Dark World | Battery: " +
                 std::to_string(static_cast<int>(e.get<BatteryLifeComponent>().current)) +
-                "% | Mode: " +
+                "% | Score: " +
+                std::to_string(score) +
+                " | Mode: " +
                 modeText;
 
             SDL_SetWindowTitle(window, title.c_str());
             return;
         }
-
     }
-
 }
 
 void RenderSystem::drawPacman(
