@@ -1,38 +1,44 @@
 #include "GhostAISystem.h"
 #include "Constants.h"
 #include "GridMovement.h"
+#include "Maze.h"
 #include <cmath>
 #include <limits>
+#include <vector>
 
 namespace {
     struct DirChoice {
         float vx;
         float vy;
+        int nextCol;
+        int nextRow;
     };
 
     float entityCenterX(float x) {
-        return x + TILE_SIZE * 0.5f;
+        return x + 16.0f;
     }
 
     float entityCenterY(float y) {
-        return y + TILE_SIZE * 0.5f;
+        return y + 16.0f;
     }
 
     int tileCol(float x) {
-        return static_cast<int>(std::floor(entityCenterX(x) / TILE_SIZE));
+        return static_cast<int>(std::floor((entityCenterX(x) - MAZE_START_X) / MAZE_TILE_SIZE));
     }
 
     int tileRow(float y) {
-        return static_cast<int>(std::floor(entityCenterY(y) / TILE_SIZE));
+        return static_cast<int>(std::floor((entityCenterY(y) - MAZE_START_Y) / MAZE_TILE_SIZE));
     }
 
     bool isAtTileCenter(float x, float y) {
         const float cx = entityCenterX(x);
         const float cy = entityCenterY(y);
-        const float tx = std::fmod(std::fmod(cx, TILE_SIZE) + TILE_SIZE, TILE_SIZE);
-        const float ty = std::fmod(std::fmod(cy, TILE_SIZE) + TILE_SIZE, TILE_SIZE);
+        const float rx = cx - MAZE_START_X;
+        const float ry = cy - MAZE_START_Y;
+        const float tx = std::fmod(std::fmod(rx, MAZE_TILE_SIZE) + MAZE_TILE_SIZE, MAZE_TILE_SIZE);
+        const float ty = std::fmod(std::fmod(ry, MAZE_TILE_SIZE) + MAZE_TILE_SIZE, MAZE_TILE_SIZE);
         constexpr float eps = 4.0f;
-        return std::abs(tx - TILE_SIZE * 0.5f) <= eps && std::abs(ty - TILE_SIZE * 0.5f) <= eps;
+        return std::abs(tx - MAZE_TILE_SIZE * 0.5f) <= eps && std::abs(ty - MAZE_TILE_SIZE * 0.5f) <= eps;
     }
 
     float distanceSq(float ax, float ay, float bx, float by) {
@@ -92,48 +98,55 @@ namespace {
         }
     }
 
-    bool isSameDirection(const DirChoice& dir, const MovementComponent& move) {
-        return dir.vx == move.vx && dir.vy == move.vy;
-    }
-
     void chooseDirection(MovementComponent& move, const SDL_FPoint& target, float posX, float posY, float speed) {
         const float cx = entityCenterX(posX);
         const float cy = entityCenterY(posY);
+        const int col = static_cast<int>(std::floor((cx - MAZE_START_X) / MAZE_TILE_SIZE));
+        const int row = static_cast<int>(std::floor((cy - MAZE_START_Y) / MAZE_TILE_SIZE));
 
         const DirChoice options[] = {
-            { 0.0f, -speed },
-            { 0.0f, speed },
-            { -speed, 0.0f },
-            { speed, 0.0f }
+            { 0.0f, -speed, col, row - 1 },
+            { 0.0f, speed, col, row + 1 },
+            { -speed, 0.0f, col - 1, row },
+            { speed, 0.0f, col + 1, row }
         };
 
-        auto tryPick = [&](bool allowReverse) {
-            float bestDist = std::numeric_limits<float>::max();
-            DirChoice best = options[0];
+        std::vector<DirChoice> validChoices;
+        std::vector<DirChoice> reverseChoices;
 
-            for (const auto& dir : options) {
-                if (!allowReverse) {
-                    if (dir.vx == -move.vx && move.vx != 0.0f) continue;
-                    if (dir.vy == -move.vy && move.vy != 0.0f) continue;
-                }
-
-                const float nextDist = distanceSq(
-                    target.x, target.y,
-                    cx + dir.vx * 0.05f, cy + dir.vy * 0.05f
-                );
-
-                if (nextDist < bestDist - 1.0f || (std::abs(nextDist - bestDist) <= 1.0f && isSameDirection(dir, move))) {
-                    bestDist = nextDist;
-                    best = dir;
-                }
+        for (const auto& opt : options) {
+            if (isWall(opt.nextCol, opt.nextRow)) {
+                continue;
             }
+            const bool isReverse = (opt.vx == -move.vx && move.vx != 0.0f) || (opt.vy == -move.vy && move.vy != 0.0f);
+            if (isReverse) {
+                reverseChoices.push_back(opt);
+            } else {
+                validChoices.push_back(opt);
+            }
+        }
 
-            return best;
-        };
+        const auto& choices = validChoices.empty() ? reverseChoices : validChoices;
 
-        DirChoice best = tryPick(false);
-        if (best.vx == 0.0f && best.vy == 0.0f) {
-            best = tryPick(true);
+        if (choices.empty()) {
+            move.vx = 0.0f;
+            move.vy = 0.0f;
+            return;
+        }
+
+        float bestDist = std::numeric_limits<float>::max();
+        DirChoice best = choices[0];
+
+        for (const auto& opt : choices) {
+            const float nextCenterX = MAZE_START_X + opt.nextCol * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f;
+            const float nextCenterY = MAZE_START_Y + opt.nextRow * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f;
+            const float nextDist = distanceSq(target.x, target.y, nextCenterX, nextCenterY);
+
+            const bool isSameDir = (opt.vx == move.vx && opt.vy == move.vy);
+            if (nextDist < bestDist - 1.0f || (std::abs(nextDist - bestDist) <= 1.0f && isSameDir)) {
+                bestDist = nextDist;
+                best = opt;
+            }
         }
 
         move.vx = best.vx;
@@ -143,23 +156,40 @@ namespace {
 
     void chooseFrightenedDirection(MovementComponent& move, int ghostId, int col, int row, float speed) {
         const DirChoice options[] = {
-            { 0.0f, -speed },
-            { 0.0f, speed },
-            { -speed, 0.0f },
-            { speed, 0.0f }
+            { 0.0f, -speed, col, row - 1 },
+            { 0.0f, speed, col, row + 1 },
+            { -speed, 0.0f, col - 1, row },
+            { speed, 0.0f, col + 1, row }
         };
 
-        const float prevVx = move.vx;
-        const float prevVy = move.vy;
-        const int seed = col * 31 + row * 17 + ghostId * 13;
-        int pick = std::abs(seed) % 4;
+        std::vector<DirChoice> validChoices;
+        std::vector<DirChoice> reverseChoices;
 
-        if ((prevVx != 0.0f && options[pick].vx == -prevVx) || (prevVy != 0.0f && options[pick].vy == -prevVy)) {
-            pick = (pick + 1) % 4;
+        for (const auto& opt : options) {
+            if (isWall(opt.nextCol, opt.nextRow)) {
+                continue;
+            }
+            const bool isReverse = (opt.vx == -move.vx && move.vx != 0.0f) || (opt.vy == -move.vy && move.vy != 0.0f);
+            if (isReverse) {
+                reverseChoices.push_back(opt);
+            } else {
+                validChoices.push_back(opt);
+            }
         }
 
-        move.vx = options[pick].vx;
-        move.vy = options[pick].vy;
+        const auto& choices = validChoices.empty() ? reverseChoices : validChoices;
+
+        if (choices.empty()) {
+            move.vx = 0.0f;
+            move.vy = 0.0f;
+            return;
+        }
+
+        const int seed = col * 31 + row * 17 + ghostId * 13;
+        int pick = std::abs(seed) % choices.size();
+
+        move.vx = choices[pick].vx;
+        move.vy = choices[pick].vy;
         enforceCardinalMovement(move);
     }
 

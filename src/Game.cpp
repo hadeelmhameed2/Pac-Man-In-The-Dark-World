@@ -80,7 +80,7 @@ void Game::createPacman() {
         FlashlightComponent{ false, true },
         DirectionComponent{ Direction::Right },
         InputComponent{ true },
-        PositionComponent{ 388.0f, 690.0f },
+        PositionComponent{ 378.0f, 723.0f },
         MovementComponent{ 0.0f, 0.0f, 160.0f },
         DrawingComponent{ 32, 32, 255, 255, 0, 255 },
         CollisionComponent{ 32, 32, false }
@@ -88,10 +88,14 @@ void Game::createPacman() {
 }
 
 void Game::createGhosts() {
-    spawnGhost(0, 396.0f, 370.0f, 0.0f, -GHOST_SPEED, 255, 0, 0);
-    spawnGhost(1, 432.0f, 370.0f, 0.0f, GHOST_SPEED, 255, 120, 200);
-    spawnGhost(2, 468.0f, 370.0f, -GHOST_SPEED, 0.0f, 0, 180, 255);
-    spawnGhost(3, 360.0f, 370.0f, GHOST_SPEED, 0.0f, 255, 150, 0);
+    // Spawn Blinky (red, type 0) at col 13, row 11 (outside ghost house)
+    spawnGhost(0, 378.0f, 315.0f, 0.0f, -GHOST_SPEED, 255, 0, 0);
+    // Spawn Pinky (pink, type 1) at col 13, row 14 (inside ghost house center)
+    spawnGhost(1, 378.0f, 387.0f, 0.0f, GHOST_SPEED, 255, 120, 200);
+    // Spawn Inky (cyan, type 2) at col 12, row 14 (inside ghost house left)
+    spawnGhost(2, 354.0f, 387.0f, -GHOST_SPEED, 0.0f, 0, 180, 255);
+    // Spawn Clyde (orange, type 3) at col 15, row 14 (inside ghost house right)
+    spawnGhost(3, 426.0f, 387.0f, GHOST_SPEED, 0.0f, 255, 150, 0);
 }
 
 void Game::updateSystems(float deltaTime) {
@@ -135,6 +139,21 @@ void Game::run() {
 void Game::update(float deltaTime) {
     updateSystems(deltaTime);
     batterySystem.update(deltaTime);
+    
+    // Check if Game Over (battery is 0%)
+    static const bagel::Mask stateMask = bagel::MaskBuilder()
+        .set<GameStateComponent>()
+        .build();
+    static int stateQ = bagel::World::createQuery(stateMask);
+    if (!bagel::World::eof(stateQ)) {
+        bagel::Entity stateEnt = bagel::World::first(stateQ);
+        if (stateEnt.get<GameStateComponent>().isGameOver) {
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Game Over", "Your battery died! Game Over.", window);
+            running = false;
+            return;
+        }
+    }
+
     movementSystem.update(deltaTime);
     applyGhostGridMovement();
 }

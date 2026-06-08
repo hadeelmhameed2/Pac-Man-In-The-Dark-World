@@ -1,17 +1,165 @@
 #include "RenderSystem.h"
 #include "Constants.h"
+#include "Maze.h"
 #include <vector>
 #include <string>
 #include <algorithm>
 
 
+#include <cmath>
+
+namespace {
+    float sign(float px, float py, float ax, float ay, float bx, float by) {
+        return (px - bx) * (ay - by) - (ax - bx) * (py - by);
+    }
+
+    bool pointInTriangle(float px, float py, float ax, float ay, float bx, float by, float cx, float cy) {
+        float d1 = sign(px, py, ax, ay, bx, by);
+        float d2 = sign(px, py, bx, by, cx, cy);
+        float d3 = sign(px, py, cx, cy, ax, ay);
+
+        bool has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+        bool has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+        return !(has_neg && has_pos);
+    }
+
+    bool isGhostLit(
+        float gx, float gy,
+        float px, float py,
+        Direction pacmanDir,
+        bool flashlightOn,
+        VisionMode visionMode,
+        float lightRadius
+    ) {
+        if (visionMode == VisionMode::Full) {
+            return true;
+        }
+
+        float gx_center = gx + 16.0f;
+        float gy_center = gy + 16.0f;
+        float px_center = px + 16.0f;
+        float py_center = py + 16.0f;
+
+        float dx = gx_center - px_center;
+        float dy = gy_center - py_center;
+        float dist = std::sqrt(dx * dx + dy * dy);
+
+        if (visionMode == VisionMode::MediumDark) {
+            return dist <= lightRadius + 20.0f;
+        }
+
+        if (visionMode == VisionMode::FlashlightOnly) {
+            if (dist <= 40.0f) {
+                return true;
+            }
+
+            if (flashlightOn) {
+                float length = 320.0f;
+                float width = 120.0f;
+
+                float x1 = px_center; float y1 = py_center;
+                float x2 = px_center; float y2 = py_center;
+                float x3 = px_center; float y3 = py_center;
+
+                if (pacmanDir == Direction::Right) {
+                    x2 = px_center + length; y2 = py_center - width * 0.5f;
+                    x3 = px_center + length; y3 = py_center + width * 0.5f;
+                }
+                else if (pacmanDir == Direction::Left) {
+                    x2 = px_center - length; y2 = py_center - width * 0.5f;
+                    x3 = px_center - length; y3 = py_center + width * 0.5f;
+                }
+                else if (pacmanDir == Direction::Up) {
+                    x2 = px_center - width * 0.5f; y2 = py_center - length;
+                    x3 = px_center + width * 0.5f; y3 = py_center - length;
+                }
+                else if (pacmanDir == Direction::Down) {
+                    x2 = px_center - width * 0.5f; y2 = py_center + length;
+                    x3 = px_center + width * 0.5f; y3 = py_center + length;
+                }
+
+                return pointInTriangle(gx_center, gy_center, x1, y1, x2, y2, x3, y3);
+            }
+        }
+
+        return false;
+    }
+
+    void drawCircleHelper(SDL_Renderer* renderer, float centerX, float centerY, float radius, Uint8 a) {
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 12, a);
+
+        for (int y = static_cast<int>(-radius); y <= static_cast<int>(radius); ++y) {
+            for (int x = static_cast<int>(-radius); x <= static_cast<int>(radius); ++x) {
+                if (x * x + y * y <= radius * radius) {
+                    SDL_RenderPoint(
+                        renderer,
+                        centerX + static_cast<float>(x),
+                        centerY + static_cast<float>(y)
+                    );
+                }
+            }
+        }
+    }
+
+    void drawTriangleHelper(SDL_Renderer* renderer, float x1, float y1, float x2, float y2, float x3, float y3, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
+        SDL_Vertex vertices[3];
+        vertices[0].position = { x1, y1 };
+        vertices[0].color = { static_cast<float>(r) / 255.0f, static_cast<float>(g) / 255.0f, static_cast<float>(b) / 255.0f, static_cast<float>(a) / 255.0f };
+        vertices[1].position = { x2, y2 };
+        vertices[1].color = { static_cast<float>(r) / 255.0f, static_cast<float>(g) / 255.0f, static_cast<float>(b) / 255.0f, static_cast<float>(a) / 255.0f };
+        vertices[2].position = { x3, y3 };
+        vertices[2].color = { static_cast<float>(r) / 255.0f, static_cast<float>(g) / 255.0f, static_cast<float>(b) / 255.0f, static_cast<float>(a) / 255.0f };
+
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+        SDL_RenderGeometry(renderer, nullptr, vertices, 3, nullptr, 0);
+    }
+
+    void drawGlowingEyes(
+        SDL_Renderer* renderer,
+        float x,
+        float y,
+        Uint8 r,
+        Uint8 g,
+        Uint8 b,
+        Uint8 a
+    ) {
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+
+        for (int ey = -4; ey <= 4; ++ey) {
+            for (int ex = -4; ex <= 4; ++ex) {
+                if (ex * ex + ey * ey <= 16) {
+                    SDL_RenderPoint(renderer, x + 9.0f + ex, y + 12.0f + ey);
+                    SDL_RenderPoint(renderer, x + 20.0f + ex, y + 12.0f + ey);
+                }
+            }
+        }
+
+        Uint8 cr = std::min(255, r + 100);
+        Uint8 cg = std::min(255, g + 100);
+        Uint8 cb = std::min(255, b + 100);
+        SDL_SetRenderDrawColor(renderer, cr, cg, cb, a);
+
+        for (int ey = -2; ey <= 2; ++ey) {
+            for (int ex = -2; ex <= 2; ++ex) {
+                if (ex * ex + ey * ey <= 4) {
+                    SDL_RenderPoint(renderer, x + 9.0f + ex, y + 12.0f + ey);
+                    SDL_RenderPoint(renderer, x + 20.0f + ex, y + 12.0f + ey);
+                }
+            }
+        }
+    }
+}
+
 void RenderSystem::render(
     SDL_Renderer* renderer,
     VisionMode visionMode
 ) {
-   if (renderer == nullptr) {
-    return;
-}
+    if (renderer == nullptr) {
+        return;
+    }
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
@@ -21,228 +169,242 @@ void RenderSystem::render(
     drawMaze(renderer);
     drawDots(renderer);
 
-
-    static const bagel::Mask drawMask =
-    bagel::MaskBuilder()
-        .set<PositionComponent>()
-        .set<DrawingComponent>()
-        .build();
-
-    static const bagel::Mask pacmanMask =
-    bagel::MaskBuilder()
+    static const bagel::Mask pacmanMask = bagel::MaskBuilder()
         .set<InputComponent>()
         .set<PositionComponent>()
         .set<DrawingComponent>()
         .set<DirectionComponent>()
         .build();
+    static int pacmanQ = bagel::World::createQuery(pacmanMask);
 
-// Draw entities
-for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next())
-{
-    if (!e.test(drawMask))
-        continue;
+    float px = 388.0f;
+    float py = 690.0f;
+    Direction pacmanDir = Direction::Right;
+    bool flashlightOn = false;
+    float pacWidth = 32.0f;
+    float pacHeight = 32.0f;
 
-    auto& position = e.get<PositionComponent>();
-    auto& drawing  = e.get<DrawingComponent>();
+    if (!bagel::World::eof(pacmanQ)) {
+        bagel::Entity pacmanEnt = bagel::World::first(pacmanQ);
+        auto& pos = pacmanEnt.get<PositionComponent>();
+        px = pos.x;
+        py = pos.y;
+        pacmanDir = pacmanEnt.get<DirectionComponent>().current;
+        auto& drawing = pacmanEnt.get<DrawingComponent>();
+        pacWidth = drawing.width;
+        pacHeight = drawing.height;
+        if (pacmanEnt.has<FlashlightComponent>()) {
+            flashlightOn = pacmanEnt.get<FlashlightComponent>().isOn;
+        }
+    }
 
-    if (e.has<InputComponent>()) //player
+    static const bagel::Mask stateMask = bagel::MaskBuilder()
+        .set<GameStateComponent>()
+        .build();
+    static int stateQ = bagel::World::createQuery(stateMask);
+
+    float batteryLevel = 100.0f;
+    bool isGameOver = false;
+    bool isLowBattery = false;
+    if (!bagel::World::eof(stateQ)) {
+        bagel::Entity stateEnt = bagel::World::first(stateQ);
+        auto& state = stateEnt.get<GameStateComponent>();
+        batteryLevel = state.batteryLevel;
+        isGameOver = state.isGameOver;
+        isLowBattery = state.isLowBattery;
+    }
+
+    float pulseTimer = static_cast<float>(SDL_GetTicks()) / 1000.0f;
+    float lightRadius = LIGHT_RADIUS * (batteryLevel / 100.0f);
+    if (isGameOver) {
+        lightRadius = LIGHT_RADIUS * 0.25f;
+    } else if (isLowBattery) {
+        const float flicker = 0.85f + 0.15f * std::sin(pulseTimer * 8.0f);
+        lightRadius *= flicker;
+    }
+
+    static const bagel::Mask drawMask = bagel::MaskBuilder()
+        .set<PositionComponent>()
+        .set<DrawingComponent>()
+        .build();
+
+    for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next())
     {
-        auto& direction = e.get<DirectionComponent>();
-        drawPacman(renderer,position,drawing,direction);
+        if (!e.test(drawMask))
+            continue;
 
-        if (e.has<FlashlightComponent>())
+        auto& position = e.get<PositionComponent>();
+        auto& drawing  = e.get<DrawingComponent>();
+
+        if (e.has<InputComponent>())
         {
-            auto& flashlight = e.get<FlashlightComponent>();
+            auto& direction = e.get<DirectionComponent>();
+            drawPacman(renderer, position, drawing, direction);
+        }
+        else if (e.has<GhostAI>())
+        {
+            bool lit = isGhostLit(position.x, position.y, px, py, pacmanDir, flashlightOn, visionMode, lightRadius);
+            if (lit) {
+                Uint8 alpha = drawing.a;
+                if (e.has<VisibilityComponent>() && visionMode != VisionMode::Full) {
+                    const float opacity = std::max(GHOST_MIN_OPACITY, e.get<VisibilityComponent>().opacity);
+                    alpha = static_cast<Uint8>(opacity * 255.0f);
+                }
+                drawGhost(renderer, position.x, position.y, drawing.r, drawing.g, drawing.b, alpha);
+            }
+        }
+        else
+        {
+            SDL_FRect rect = {
+                position.x,
+                position.y,
+                static_cast<float>(drawing.width),
+                static_cast<float>(drawing.height)
+            };
 
-            if (flashlight.isOn &&
-                visionMode != VisionMode::Full)
-            {
-                drawFlashlight(
-                    renderer,
-                    position,
-                    drawing,
-                    direction
-                );
+            SDL_SetRenderDrawColor(renderer, drawing.r, drawing.g, drawing.b, drawing.a);
+            SDL_RenderFillRect(renderer, &rect);
+        }
+    }
+
+    if (visionMode != VisionMode::Full)
+    {
+        static SDL_Texture* lightMask = nullptr;
+        if (lightMask == nullptr) {
+            lightMask = SDL_CreateTexture(
+                renderer,
+                SDL_PIXELFORMAT_RGBA8888,
+                SDL_TEXTUREACCESS_TARGET,
+                WINDOW_WIDTH,
+                WINDOW_HEIGHT
+            );
+            if (lightMask != nullptr) {
+                SDL_SetTextureBlendMode(lightMask, SDL_BLENDMODE_BLEND);
+            }
+        }
+
+        if (lightMask != nullptr) {
+            SDL_SetRenderTarget(renderer, lightMask);
+
+            float batteryFactor = batteryLevel / 100.0f;
+            Uint8 baseAlpha = 255;
+            if (visionMode == VisionMode::MediumDark) {
+                baseAlpha = static_cast<Uint8>(140.0f + 115.0f * (1.0f - batteryFactor));
+            }
+
+            SDL_FRect clearRect = { 0.0f, 0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT) };
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+            SDL_SetRenderDrawColor(renderer, 0, 0, 12, baseAlpha);
+            SDL_RenderFillRect(renderer, &clearRect);
+
+            float px_center = px + pacWidth * 0.5f;
+            float py_center = py + pacHeight * 0.5f;
+
+            if (visionMode == VisionMode::MediumDark) {
+                Uint8 a1 = static_cast<Uint8>(180 + 75 * (1.0f - batteryFactor));
+                Uint8 a2 = static_cast<Uint8>(100 + 155 * (1.0f - batteryFactor));
+                Uint8 a3 = static_cast<Uint8>(255 * (1.0f - batteryFactor));
+                drawCircleHelper(renderer, px_center, py_center, lightRadius, a1);
+                drawCircleHelper(renderer, px_center, py_center, lightRadius * 0.85f, a2);
+                drawCircleHelper(renderer, px_center, py_center, lightRadius * 0.6f, a3);
+            }
+            else if (visionMode == VisionMode::FlashlightOnly) {
+                float innerCircleRadius = 40.0f * batteryFactor;
+                Uint8 a1 = static_cast<Uint8>(150 + 105 * (1.0f - batteryFactor));
+                Uint8 a2 = static_cast<Uint8>(255 * (1.0f - batteryFactor));
+                drawCircleHelper(renderer, px_center, py_center, innerCircleRadius, a1);
+                drawCircleHelper(renderer, px_center, py_center, innerCircleRadius * 0.5f, a2);
+
+                if (flashlightOn) {
+                    float length = 320.0f * batteryFactor;
+                    float width = 120.0f * batteryFactor;
+
+                    float x1 = px_center; float y1 = py_center;
+                    float x2 = px_center; float y2 = py_center;
+                    float x3 = px_center; float y3 = py_center;
+
+                    float x2_wide = px_center; float y2_wide = py_center;
+                    float x3_wide = px_center; float y3_wide = py_center;
+
+                    if (pacmanDir == Direction::Right) {
+                        x2 = px_center + length; y2 = py_center - width * 0.5f;
+                        x3 = px_center + length; y3 = py_center + width * 0.5f;
+                        x2_wide = px_center + length + 20.0f * batteryFactor; y2_wide = py_center - width * 0.65f;
+                        x3_wide = px_center + length + 20.0f * batteryFactor; y3_wide = py_center + width * 0.65f;
+                    }
+                    else if (pacmanDir == Direction::Left) {
+                        x2 = px_center - length; y2 = py_center - width * 0.5f;
+                        x3 = px_center - length; y3 = py_center + width * 0.5f;
+                        x2_wide = px_center - length - 20.0f * batteryFactor; y2_wide = py_center - width * 0.65f;
+                        x3_wide = px_center - length - 20.0f * batteryFactor; y3_wide = py_center + width * 0.65f;
+                    }
+                    else if (pacmanDir == Direction::Up) {
+                        x2 = px_center - width * 0.5f; y2 = py_center - length;
+                        x3 = px_center + width * 0.5f; y3 = py_center - length;
+                        x2_wide = px_center - width * 0.65f; y2_wide = py_center - length - 20.0f * batteryFactor;
+                        x3_wide = px_center + width * 0.65f; y3_wide = py_center - length - 20.0f * batteryFactor;
+                    }
+                    else if (pacmanDir == Direction::Down) {
+                        x2 = px_center - width * 0.5f; y2 = py_center + length;
+                        x3 = px_center + width * 0.5f; y3 = py_center + length;
+                        x2_wide = px_center - width * 0.65f; y2_wide = py_center + length + 20.0f * batteryFactor;
+                        x3_wide = px_center + width * 0.65f; y3_wide = py_center + length + 20.0f * batteryFactor;
+                    }
+
+                    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+                    drawTriangleHelper(renderer, x1, y1, x2_wide, y2_wide, x3_wide, y3_wide, 0, 0, 0, a1);
+                    drawTriangleHelper(renderer, x1, y1, x2, y2, x3, y3, 0, 0, 0, a2);
+                }
+            }
+
+            SDL_SetRenderTarget(renderer, nullptr);
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+            SDL_RenderTexture(renderer, lightMask, nullptr, nullptr);
+        }
+    }
+
+    if (visionMode != VisionMode::Full)
+    {
+        for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next())
+        {
+            if (!e.test(drawMask) || !e.has<GhostAI>())
+                continue;
+
+            auto& position = e.get<PositionComponent>();
+            auto& drawing  = e.get<DrawingComponent>();
+
+            bool lit = isGhostLit(position.x, position.y, px, py, pacmanDir, flashlightOn, visionMode, lightRadius);
+            if (!lit) {
+                drawGlowingEyes(renderer, position.x, position.y, drawing.r, drawing.g, drawing.b, 255);
             }
         }
     }
-    else if (e.has<GhostAI>())
-    {
-        Uint8 alpha = drawing.a;
-        if (e.has<VisibilityComponent>()) {
-            const float opacity = std::max(GHOST_MIN_OPACITY, e.get<VisibilityComponent>().opacity);
-            alpha = static_cast<Uint8>(opacity * 255.0f);
-        }
 
-        drawGhost(renderer, position.x, position.y, drawing.r, drawing.g, drawing.b, alpha);
-    }
-    else
-    {
-        SDL_FRect rect = {
-            position.x,
-            position.y,
-            static_cast<float>(drawing.width),
-            static_cast<float>(drawing.height)
-        };
-
-        SDL_SetRenderDrawColor(
-            renderer,
-            drawing.r,
-            drawing.g,
-            drawing.b,
-            drawing.a
-        );
-
-        SDL_RenderFillRect(renderer, &rect);
-    }
-}
-
-// Darkness / flashlight effects
-for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next())
-{
-    if (!e.test(pacmanMask))
-        continue;
-
-    auto& position  = e.get<PositionComponent>();
-    auto& drawing   = e.get<DrawingComponent>();
-    auto& direction = e.get<DirectionComponent>();
-
-    if (visionMode == VisionMode::MediumDark)
-    {
-        drawDarkOverlay(renderer, 120);
-
-        drawLightAroundPacman(
-            renderer,
-            position,
-            drawing,
-            120.0f
-        );
-    }
-    else if (visionMode == VisionMode::FlashlightOnly)
-    {
-        drawDarkOverlay(renderer, 225);
-
-        drawLightAroundPacman(
-            renderer,
-            position,
-            drawing,
-            35.0f
-        );
-
-        if (e.has<FlashlightComponent>() &&
-            e.get<FlashlightComponent>().isOn)
-        {
-            drawFlashlight(
-                renderer,
-                position,
-                drawing,
-                direction
-            );
-        }
-    }
-
-    break; // only one Pacman
-}
-
-SDL_RenderPresent(renderer);
+    SDL_RenderPresent(renderer);
 }
 
 void RenderSystem::drawMaze(SDL_Renderer* renderer) {
-    const std::vector<std::string> maze = {
-        "############################",
-        "#............##............#",
-        "#.####.#####.##.#####.####.#",
-        "#o####.#####.##.#####.####o#",
-        "#.####.#####.##.#####.####.#",
-        "#..........................#",
-        "#.####.##.########.##.####.#",
-        "#.####.##.########.##.####.#",
-        "#......##....##....##......#",
-        "######.##### ## #####.######",
-        "     #.##### ## #####.#     ",
-        "     #.##          ##.#     ",
-        "     #.## ###--### ##.#     ",
-        "######.## #      # ##.######",
-        "      .   #      #   .      ",
-        "######.## #      # ##.######",
-        "     #.## ######## ##.#     ",
-        "     #.##          ##.#     ",
-        "     #.## ######## ##.#     ",
-        "######.## ######## ##.######",
-        "#............##............#",
-        "#.####.#####.##.#####.####.#",
-        "#o..##................##..o#",
-        "###.##.##.########.##.##.###",
-        "###.##.##.########.##.##.###",
-        "#......##....##....##......#",
-        "#.##########.##.##########.#",
-        "#.##########.##.##########.#",
-        "#..........................#",
-        "############################"
-    };
+    for (int row = 0; row < MAZE_ROWS; ++row) {
+        for (int col = 0; col < MAZE_COLS; ++col) {
+            char cell = MAZE_LAYOUT[row][col];
 
-    const float tile = 24.0f;
-    const float startX = 70.0f;
-    const float startY = 55.0f;
-
-    for (int row = 0; row < static_cast<int>(maze.size()); ++row) {
-        for (int col = 0; col < static_cast<int>(maze[row].size()); ++col) {
-            char cell = maze[row][col];
-
-            float x = startX + col * tile;
-            float y = startY + row * tile;
+            float x = MAZE_START_X + col * MAZE_TILE_SIZE;
+            float y = MAZE_START_Y + row * MAZE_TILE_SIZE;
 
             if (cell == '#') {
-                drawGlowRect(renderer, x, y, tile, tile);
+                drawGlowRect(renderer, x, y, MAZE_TILE_SIZE, MAZE_TILE_SIZE);
             }
         }
     }
 }
 
 void RenderSystem::drawDots(SDL_Renderer* renderer) {
-    const std::vector<std::string> maze = {
-        "############################",
-        "#............##............#",
-        "#.####.#####.##.#####.####.#",
-        "#o####.#####.##.#####.####o#",
-        "#.####.#####.##.#####.####.#",
-        "#..........................#",
-        "#.####.##.########.##.####.#",
-        "#.####.##.########.##.####.#",
-        "#......##....##....##......#",
-        "######.##### ## #####.######",
-        "     #.##### ## #####.#     ",
-        "     #.##          ##.#     ",
-        "     #.## ###--### ##.#     ",
-        "######.## #      # ##.######",
-        "      .   #      #   .      ",
-        "######.## #      # ##.######",
-        "     #.## ######## ##.#     ",
-        "     #.##          ##.#     ",
-        "     #.## ######## ##.#     ",
-        "######.## ######## ##.######",
-        "#............##............#",
-        "#.####.#####.##.#####.####.#",
-        "#o..##................##..o#",
-        "###.##.##.########.##.##.###",
-        "###.##.##.########.##.##.###",
-        "#......##....##....##......#",
-        "#.##########.##.##########.#",
-        "#.##########.##.##########.#",
-        "#..........................#",
-        "############################"
-    };
+    for (int row = 0; row < MAZE_ROWS; ++row) {
+        for (int col = 0; col < MAZE_COLS; ++col) {
+            char cell = MAZE_LAYOUT[row][col];
 
-    const float tile = 24.0f;
-    const float startX = 70.0f;
-    const float startY = 55.0f;
-
-    for (int row = 0; row < static_cast<int>(maze.size()); ++row) {
-        for (int col = 0; col < static_cast<int>(maze[row].size()); ++col) {
-            char cell = maze[row][col];
-
-            float centerX = startX + col * tile + tile / 2.0f;
-            float centerY = startY + row * tile + tile / 2.0f;
+            float centerX = MAZE_START_X + col * MAZE_TILE_SIZE + MAZE_TILE_SIZE / 2.0f;
+            float centerY = MAZE_START_Y + row * MAZE_TILE_SIZE + MAZE_TILE_SIZE / 2.0f;
 
             if (cell == '.') {
                 drawFilledCircle(renderer, centerX, centerY, 2.5f, 235, 215, 185, 255);

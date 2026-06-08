@@ -73,6 +73,7 @@ struct GameStateComponent {
 
 struct DirectionComponent {
     Direction current = Direction::None;
+    Direction queued = Direction::None;
 };
 
 struct FlashlightComponent {
