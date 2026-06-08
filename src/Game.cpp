@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <string>
 
 #include "GridMovement.h"
 #include "GameStateSystem.h"
@@ -49,6 +50,7 @@ bool Game::init() {
 
     if (!window) {
         std::cout << "Window creation failed: " << SDL_GetError() << std::endl;
+        SDL_Quit();
         return false;
     }
 
@@ -56,6 +58,9 @@ bool Game::init() {
 
     if (!renderer) {
         std::cout << "Renderer creation failed: " << SDL_GetError() << std::endl;
+        SDL_DestroyWindow(window);
+        window = nullptr;
+        SDL_Quit();
         return false;
     }
 
@@ -74,22 +79,110 @@ void Game::createGameState() {
 }
 
 void Game::createPacman() {
-    bagel::Entity entity = bagel::Entity::create();
-    pacman = entity.entity();
 
-    entity.add(PositionComponent{ 10.0f * TILE_SIZE, 14.0f * TILE_SIZE });
-    entity.add(MovementComponent{ 0.0f, 0.0f, PACMAN_SPEED });
-    entity.add(DrawingComponent{ TILE_SIZE, TILE_SIZE, 255, 255, 0, 255 });
-    entity.add(CollisionComponent{ TILE_SIZE, TILE_SIZE, false });
-    entity.add(InputComponent{ true });
-}
+    auto pacman = bagel::Entity::create();
 
+    pacman.addAll(
+        BatteryLifeComponent{100.0f,100.0f,0.3f,1.2f},
+        FlashlightComponent{false,true},
+        DirectionComponent{Direction::Right},
+        InputComponent{true},
+        PositionComponent{388.0f,690.0f},
+        MovementComponent{0.0f,0.0f,160.0f},
+        DrawingComponent{32,32,255,255,0,255},
+        CollisionComponent{32,32,false}
+    );
+
+    std::cout << "\n=== PACMAN COMPONENTS ===\n";
 void Game::createGhosts() {
     spawnGhost(0, 12.0f * TILE_SIZE, 9.0f * TILE_SIZE, 0.0f, -GHOST_SPEED, 255, 0, 0);
     spawnGhost(1, 12.0f * TILE_SIZE, 11.0f * TILE_SIZE, 0.0f, GHOST_SPEED, 255, 182, 193);
     spawnGhost(2, 10.0f * TILE_SIZE, 10.0f * TILE_SIZE, -GHOST_SPEED, 0.0f, 0, 255, 255);
     spawnGhost(3, 14.0f * TILE_SIZE, 10.0f * TILE_SIZE, GHOST_SPEED, 0.0f, 255, 165, 0);
 }
+
+    if (pacman.has<PositionComponent>())
+    {
+        auto& p = pacman.get<PositionComponent>();
+        std::cout
+            << "Position: x=" << p.x
+            << " y=" << p.y
+            << std::endl;
+    }
+
+    if (pacman.has<MovementComponent>())
+    {
+        auto& m = pacman.get<MovementComponent>();
+        std::cout
+            << "Movement: vx=" << m.vx
+            << " vy=" << m.vy
+            << " speed=" << m.speed
+            << std::endl;
+    }
+
+    if (pacman.has<DrawingComponent>())
+    {
+        auto& d = pacman.get<DrawingComponent>();
+        std::cout
+            << "Drawing: w=" << d.width
+            << " h=" << d.height
+            << " rgba=("
+            << (int)d.r << ","
+            << (int)d.g << ","
+            << (int)d.b << ","
+            << (int)d.a << ")"
+            << std::endl;
+    }
+
+    if (pacman.has<CollisionComponent>())
+    {
+        auto& c = pacman.get<CollisionComponent>();
+        std::cout
+            << "Collision: w=" << c.width
+            << " h=" << c.height
+            << " solid=" << c.isSolid
+            << std::endl;
+    }
+
+    if (pacman.has<DirectionComponent>())
+    {
+        auto& dir = pacman.get<DirectionComponent>();
+        std::cout
+            << "Direction: "
+            << static_cast<int>(dir.current)
+            << std::endl;
+    }
+
+    if (pacman.has<FlashlightComponent>())
+    {
+        auto& f = pacman.get<FlashlightComponent>();
+        std::cout
+            << "Flashlight: on=" << f.isOn
+            << " available=" << f.isAvailable
+            << std::endl;
+    }
+
+    if (pacman.has<BatteryLifeComponent>())
+    {
+        auto& b = pacman.get<BatteryLifeComponent>();
+        std::cout
+            << "Battery: current=" << b.current
+            << " max=" << b.max
+            << " drain=" << b.normalDrainPerSecond
+            << " flashlightDrain=" << b.flashlightDrainPerSecond
+            << std::endl;
+    }
+
+    if (pacman.has<InputComponent>())
+    {
+        auto& i = pacman.get<InputComponent>();
+        std::cout
+            << "Input: controlled="
+            << i.controlledByPlayer
+            << std::endl;
+    }
+
+    std::cout << "=========================\n";
 
 void Game::updateSystems(float deltaTime) {
     GameStateSystem::update(pacman, deltaTime);
@@ -105,7 +198,12 @@ void Game::run() {
         float deltaTime = static_cast<float>(currentTime - previousTime) / 1000.0f;
         previousTime = currentTime;
 
-        handleEvents();
+        inputSystem.handleInput(
+            running,
+            visionMode
+        );
+
+        renderSystem.drawStatus(window,visionMode);
         update(deltaTime);
         render();
 
@@ -113,107 +211,34 @@ void Game::run() {
     }
 }
 
-void Game::handleEvents() {
-    SDL_Event event;
-
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_EVENT_QUIT) {
-            running = false;
-        }
-
-        if (event.type == SDL_EVENT_KEY_DOWN) {
-            if (event.key.key == SDLK_ESCAPE) {
-                running = false;
-            }
-
-            auto& movement = bagel::World::getComponent<MovementComponent>(pacman);
-
-            if (event.key.key == SDLK_RIGHT) {
-                movement.vx = movement.speed;
-                movement.vy = 0.0f;
-            }
-            else if (event.key.key == SDLK_LEFT) {
-                movement.vx = -movement.speed;
-                movement.vy = 0.0f;
-            }
-            else if (event.key.key == SDLK_UP) {
-                movement.vx = 0.0f;
-                movement.vy = -movement.speed;
-            }
-            else if (event.key.key == SDLK_DOWN) {
-                movement.vx = 0.0f;
-                movement.vy = movement.speed;
-            }
-        }
-    }
-}
-
 void Game::update(float deltaTime) {
-    updateSystems(deltaTime);
 
-    static const bagel::Mask moveMask = bagel::MaskBuilder()
-        .set<PositionComponent>()
-        .set<MovementComponent>()
-        .build();
-    static int moveQ = bagel::World::createQuery(moveMask);
 
-    for (bagel::Entity e = bagel::World::first(moveQ); !bagel::World::eof(moveQ); e = bagel::World::next(moveQ)) {
-        auto& position = e.get<PositionComponent>();
-        auto& movement = e.get<MovementComponent>();
+    batterySystem.update(
+        deltaTime
+    );
 
-        enforceCardinalMovement(movement);
+    movementSystem.update(
+        deltaTime
+    );
 
-        position.x += movement.vx * deltaTime;
-        position.y += movement.vy * deltaTime;
 
-        snapEntityToGridLane(position, movement);
-
-        const auto& drawing = e.get<DrawingComponent>();
-        clampToScreen(position, drawing.width, drawing.height);
-    }
 }
 
 void Game::render() {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
-
-    const auto& position = bagel::World::getComponent<PositionComponent>(pacman);
-    const auto& drawing = bagel::World::getComponent<DrawingComponent>(pacman);
-    SDL_FRect pacmanRect = { position.x, position.y, static_cast<float>(drawing.width), static_cast<float>(drawing.height) };
-    SDL_SetRenderDrawColor(renderer, drawing.r, drawing.g, drawing.b, drawing.a);
-    SDL_RenderFillRect(renderer, &pacmanRect);
-
-    static const bagel::Mask renderMask = bagel::MaskBuilder()
-        .set<PositionComponent>()
-        .set<DrawingComponent>()
-        .set<VisibilityComponent>()
-        .build();
-    static int q = bagel::World::createQuery(renderMask);
-
-    for (bagel::Entity e = bagel::World::first(q); !bagel::World::eof(q); e = bagel::World::next(q)) {
-        const auto& vis = e.get<VisibilityComponent>();
-        const auto& pos = e.get<PositionComponent>();
-        const auto& draw = e.get<DrawingComponent>();
-
-        SDL_FRect entRect = { pos.x, pos.y, static_cast<float>(draw.width), static_cast<float>(draw.height) };
-
-        const float drawOpacity = std::max(GHOST_MIN_OPACITY, vis.opacity);
-        Uint8 alpha = static_cast<Uint8>(drawOpacity * 255.0f);
-        SDL_SetRenderDrawColor(renderer, draw.r, draw.g, draw.b, alpha);
-
-        SDL_RenderFillRect(renderer, &entRect);
-    }
-
-    SDL_RenderPresent(renderer);
+    renderSystem.render(
+        renderer,
+        visionMode
+    );
 }
 
 void Game::clean() {
-    if (renderer) {
+    if (renderer != nullptr) {
         SDL_DestroyRenderer(renderer);
         renderer = nullptr;
     }
 
-    if (window) {
+    if (window != nullptr) {
         SDL_DestroyWindow(window);
         window = nullptr;
     }

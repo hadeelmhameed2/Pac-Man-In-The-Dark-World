@@ -8,6 +8,7 @@ set(SDL_STATIC ON)
 set(SDL_SHARED OFF)
 
 add_subdirectory(libs/SDL)
+add_subdirectory(libs/box2d/box2d-main)
 
 add_executable(PacmanDarkWorld
         main.cpp
@@ -17,7 +18,7 @@ add_executable(PacmanDarkWorld
         src/Constants.h
         src/GridMovement.h
 
-        ecs/bagel.h
+        ecs/Entity.h
         ecs/Components.h
 
         Systems/GameStateSystem.h
@@ -31,7 +32,6 @@ add_executable(PacmanDarkWorld
 target_include_directories(PacmanDarkWorld PRIVATE
         src
         ecs
-        Systems
         libs/SDL/include
 )
 

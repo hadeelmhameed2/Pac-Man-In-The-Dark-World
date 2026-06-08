@@ -1,6 +1,20 @@
 #pragma once
-#include "bagel.h"
+
 #include <SDL3/SDL.h>
+
+enum class Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+    None
+};
+
+enum class VisionMode {
+    Full,
+    MediumDark,
+    FlashlightOnly
+};
 
 struct PositionComponent {
     float x = 0.0f;
@@ -64,4 +78,21 @@ template <> struct bagel::Storage<VisibilityComponent> final : NoInstance {
 };
 template <> struct bagel::Storage<GameStateComponent> final : NoInstance {
     using type = PackedStorage<GameStateComponent>;
+};
+
+struct DirectionComponent {
+    Direction current = Direction::None;
+};
+
+struct FlashlightComponent {
+    bool isOn = false;
+    bool isAvailable = true;
+};
+
+struct BatteryLifeComponent {
+    float current = 100.0f;
+    float max = 100.0f;
+
+    float normalDrainPerSecond = 0.3f;
+    float flashlightDrainPerSecond = 1.2f;
 };
