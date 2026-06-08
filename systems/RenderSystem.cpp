@@ -1,6 +1,8 @@
 #include "RenderSystem.h"
+#include "Constants.h"
 #include <vector>
 #include <string>
+#include <algorithm>
 
 
 void RenderSystem::render(
@@ -18,7 +20,6 @@ void RenderSystem::render(
 
     drawMaze(renderer);
     drawDots(renderer);
-    drawGhosts(renderer);
 
 
     static const bagel::Mask drawMask =
@@ -64,6 +65,16 @@ for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next())
                 );
             }
         }
+    }
+    else if (e.has<GhostAI>())
+    {
+        Uint8 alpha = drawing.a;
+        if (e.has<VisibilityComponent>()) {
+            const float opacity = std::max(GHOST_MIN_OPACITY, e.get<VisibilityComponent>().opacity);
+            alpha = static_cast<Uint8>(opacity * 255.0f);
+        }
+
+        drawGhost(renderer, position.x, position.y, drawing.r, drawing.g, drawing.b, alpha);
     }
     else
     {
@@ -243,33 +254,27 @@ void RenderSystem::drawDots(SDL_Renderer* renderer) {
     }
 }
 
-void RenderSystem::drawGhosts(SDL_Renderer* renderer) {
-    drawGhost(renderer, 396, 370, 255, 0, 0);
-    drawGhost(renderer, 432, 370, 255, 120, 200);
-    drawGhost(renderer, 468, 370, 0, 180, 255);
-    drawGhost(renderer, 360, 370, 255, 150, 0);
-}
-
 void RenderSystem::drawGhost(
     SDL_Renderer* renderer,
     float x,
     float y,
     Uint8 r,
     Uint8 g,
-    Uint8 b
+    Uint8 b,
+    Uint8 a
 ) {
-    drawFilledCircle(renderer, x + 14, y + 12, 14, r, g, b, 255);
-    drawFilledRect(renderer, x, y + 12, 28, 18, r, g, b, 255);
+    drawFilledCircle(renderer, x + 14, y + 12, 14, r, g, b, a);
+    drawFilledRect(renderer, x, y + 12, 28, 18, r, g, b, a);
 
-    drawFilledCircle(renderer, x + 5, y + 30, 5, r, g, b, 255);
-    drawFilledCircle(renderer, x + 14, y + 30, 5, r, g, b, 255);
-    drawFilledCircle(renderer, x + 23, y + 30, 5, r, g, b, 255);
+    drawFilledCircle(renderer, x + 5, y + 30, 5, r, g, b, a);
+    drawFilledCircle(renderer, x + 14, y + 30, 5, r, g, b, a);
+    drawFilledCircle(renderer, x + 23, y + 30, 5, r, g, b, a);
 
-    drawFilledCircle(renderer, x + 9, y + 12, 4, 255, 255, 255, 255);
-    drawFilledCircle(renderer, x + 20, y + 12, 4, 255, 255, 255, 255);
+    drawFilledCircle(renderer, x + 9, y + 12, 4, 255, 255, 255, a);
+    drawFilledCircle(renderer, x + 20, y + 12, 4, 255, 255, 255, a);
 
-    drawFilledCircle(renderer, x + 10, y + 12, 2, 0, 0, 40, 255);
-    drawFilledCircle(renderer, x + 21, y + 12, 2, 0, 0, 40, 255);
+    drawFilledCircle(renderer, x + 10, y + 12, 2, 0, 0, 40, a);
+    drawFilledCircle(renderer, x + 21, y + 12, 2, 0, 0, 40, a);
 }
 
 void RenderSystem::drawStatus(SDL_Window *window,VisionMode visionMode) {

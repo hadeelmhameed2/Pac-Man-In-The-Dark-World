@@ -58,14 +58,29 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
 
     for (bagel::Entity e = bagel::World::first(stateQ); !bagel::World::eof(stateQ); e = bagel::World::next(stateQ)) {
         auto& state = e.get<GameStateComponent>();
+        state.nearbyGhosts = nearbyGhosts;
 
-        if (state.isGameOver) {
-            state.isLowBattery = true;
-            state.nearbyGhosts = nearbyGhosts;
+        if (bagel::World::mask(pacmanId).test(bagel::Component<BatteryLifeComponent>::Bit)) {
+            auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
+
+            if (nearbyGhosts > 0) {
+                battery.current -= nearbyGhosts * BATTERY_DRAIN_PER_NEAR_GHOST * deltaTime;
+                if (battery.current < 0.0f) {
+                    battery.current = 0.0f;
+                }
+            }
+
+            state.batteryLevel = battery.current;
+            state.isLowBattery = battery.current <= LOW_BATTERY_THRESHOLD;
+            state.isGameOver = battery.current <= 0.0f;
             continue;
         }
 
-        state.nearbyGhosts = nearbyGhosts;
+        if (state.isGameOver) {
+            state.isLowBattery = true;
+            continue;
+        }
+
         state.batteryLevel -= (BATTERY_DRAIN_RATE + nearbyGhosts * BATTERY_DRAIN_PER_NEAR_GHOST) * deltaTime;
 
         if (state.batteryLevel < 0.0f) {

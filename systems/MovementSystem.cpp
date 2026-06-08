@@ -24,7 +24,6 @@ void MovementSystem::update(
         auto& position = e.get<PositionComponent>();
         auto& movement = e.get<MovementComponent>();
 
-        std::cout <<"Positions: "<<position.x << "   " <<position.y << std::endl;
         position.x += movement.vx * deltaTime;
         position.y += movement.vy * deltaTime;
 
