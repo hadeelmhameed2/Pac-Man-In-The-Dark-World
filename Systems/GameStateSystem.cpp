@@ -1,6 +1,7 @@
 #include "GameStateSystem.h"
 #include "Constants.h"
 #include "Maze.h"
+#include <box2d/box2d.h>
 #include <cmath>
 #include <algorithm>
 
@@ -118,6 +119,12 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
                     auto& ghostMove = ghost.get<MovementComponent>();
                     ghostMove.vx = 0.0f;
                     ghostMove.vy = 0.0f;
+
+                    if (ghost.has<PhysicsComponent>()) {
+                        b2BodyId bodyId = ghost.get<PhysicsComponent>().bodyId;
+                        b2Body_SetTransform(bodyId, b2Vec2{ GHOST_HOUSE_X, GHOST_HOUSE_Y }, b2Rot_identity);
+                        b2Body_SetLinearVelocity(bodyId, b2Vec2{ 0.0f, 0.0f });
+                    }
                 }
                 else if (ai.state == GhostState::CHASE || ai.state == GhostState::SCATTER) {
                     // Normal ghost damage to Pacman

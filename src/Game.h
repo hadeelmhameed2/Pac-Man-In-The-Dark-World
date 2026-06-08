@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include <box2d/box2d.h>
 
 #include "bagel.h"
 #include "Components.h"
@@ -38,4 +39,5 @@ private:
 
     bagel::ent_type pacman{};
     bagel::ent_type gameStateId{};
+    b2WorldId worldId{};
 };

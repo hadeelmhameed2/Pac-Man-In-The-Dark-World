@@ -23,3 +23,7 @@ constexpr float LOW_BATTERY_THRESHOLD = 25.0f;
 constexpr float CLYDE_SHY_DISTANCE = 8.0f * TILE_SIZE;
 constexpr float GHOST_HOUSE_X = WINDOW_WIDTH * 0.5f;
 constexpr float GHOST_HOUSE_Y = WINDOW_HEIGHT * 0.5f;
+
+constexpr uint64_t CATEGORY_WALL = 0x0001;
+constexpr uint64_t CATEGORY_PACMAN = 0x0002;
+constexpr uint64_t CATEGORY_GHOST = 0x0004;

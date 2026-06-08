@@ -2,6 +2,7 @@
 
 #include "bagel.h"
 #include <SDL3/SDL.h>
+#include <box2d/id.h>
 
 enum class Direction {
     Up,
@@ -20,6 +21,10 @@ enum class VisionMode {
 struct PositionComponent {
     float x = 0.0f;
     float y = 0.0f;
+};
+
+struct PhysicsComponent {
+    b2BodyId bodyId;
 };
 
 struct MovementComponent {
@@ -117,4 +122,7 @@ template <> struct bagel::Storage<VisibilityComponent> final : bagel::NoInstance
 };
 template <> struct bagel::Storage<GameStateComponent> final : bagel::NoInstance {
     using type = bagel::PackedStorage<GameStateComponent>;
+};
+template <> struct bagel::Storage<PhysicsComponent> final : bagel::NoInstance {
+    using type = bagel::PackedStorage<PhysicsComponent>;
 };

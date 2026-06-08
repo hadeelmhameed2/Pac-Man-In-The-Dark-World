@@ -277,7 +277,5 @@ void GhostAISystem::update(bagel::ent_type pacmanId, float deltaTime) {
         }
 
         ensureGhostKeepsMoving(move, ai.target, pos.x, pos.y);
-        enforceCardinalMovement(move);
-        snapEntityToGridLane(pos, move);
     }
 }

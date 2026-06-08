@@ -1,12 +1,11 @@
 #include "MovementSystem.h"
 #include "Maze.h"
 #include "GridMovement.h"
+#include <box2d/box2d.h>
 #include <cmath>
 
 namespace {
-    bool isAtTileCenter(float x, float y) {
-        const float cx = x + 16.0f;
-        const float cy = y + 16.0f;
+    bool isAtTileCenter(float cx, float cy) {
         const float rx = cx - MAZE_START_X;
         const float ry = cy - MAZE_START_Y;
         const float tx = std::fmod(std::fmod(rx, MAZE_TILE_SIZE) + MAZE_TILE_SIZE, MAZE_TILE_SIZE);
@@ -28,6 +27,7 @@ void MovementSystem::update(
      bagel::MaskBuilder()
          .set<PositionComponent>()
          .set<MovementComponent>()
+         .set<PhysicsComponent>()
          .build();
 
     for (bagel::Entity e = bagel::Entity::first();
@@ -37,20 +37,23 @@ void MovementSystem::update(
         if (!e.test(moveMask))
             continue;
 
-        auto& position = e.get<PositionComponent>();
         auto& movement = e.get<MovementComponent>();
+        auto& physics = e.get<PhysicsComponent>();
+        b2BodyId bodyId = physics.bodyId;
+
+        // Use Box2D body position as source of truth
+        b2Vec2 pos = b2Body_GetPosition(bodyId);
+        float cx = pos.x;
+        float cy = pos.y;
 
         if (e.has<InputComponent>() && e.has<DirectionComponent>())
         {
             auto& direction = e.get<DirectionComponent>();
 
-            // Calculate current tile
-            float cx = position.x + 16.0f;
-            float cy = position.y + 16.0f;
             int col = static_cast<int>(std::floor((cx - MAZE_START_X) / MAZE_TILE_SIZE));
             int row = static_cast<int>(std::floor((cy - MAZE_START_Y) / MAZE_TILE_SIZE));
 
-            const bool atCenter = isAtTileCenter(position.x, position.y);
+            const bool atCenter = isAtTileCenter(cx, cy);
 
             // Handle turning at tile center
             if (atCenter) {
@@ -67,8 +70,9 @@ void MovementSystem::update(
                         direction.queued = Direction::None;
 
                         // Snap perfectly to intersection
-                        position.x = MAZE_START_X + col * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f - 16.0f;
-                        position.y = MAZE_START_Y + row * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f - 16.0f;
+                        cx = MAZE_START_X + col * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f;
+                        cy = MAZE_START_Y + row * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f;
+                        b2Body_SetTransform(bodyId, b2Vec2{cx, cy}, b2Rot_identity);
                     }
                 }
 
@@ -84,8 +88,9 @@ void MovementSystem::update(
                     movement.vx = 0.0f;
                     movement.vy = 0.0f;
                     // Snap perfectly to intersection
-                    position.x = MAZE_START_X + col * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f - 16.0f;
-                    position.y = MAZE_START_Y + row * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f - 16.0f;
+                    cx = MAZE_START_X + col * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f;
+                    cy = MAZE_START_Y + row * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f;
+                    b2Body_SetTransform(bodyId, b2Vec2{cx, cy}, b2Rot_identity);
                 } else {
                     // Re-assert velocities
                     if (direction.current == Direction::Right) { movement.vx = movement.speed; movement.vy = 0.0f; }
@@ -96,47 +101,53 @@ void MovementSystem::update(
             }
         }
 
-        position.x += movement.vx * deltaTime;
-        position.y += movement.vy * deltaTime;
+        // Apply velocity to the Box2D body
+        b2Body_SetLinearVelocity(bodyId, b2Vec2{movement.vx, movement.vy});
 
         if (e.has<InputComponent>()) {
             enforceCardinalMovement(movement);
-            snapEntityToGridLane(position, movement);
+            
+            // Snap to lane in Box2D
+            b2Vec2 snappedPos = b2Body_GetPosition(bodyId);
+            if (std::abs(movement.vx) > 0.1f) {
+                float row = std::round((snappedPos.y - MAZE_START_Y - MAZE_TILE_SIZE * 0.5f) / MAZE_TILE_SIZE);
+                float targetY = MAZE_START_Y + row * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f;
+                b2Body_SetTransform(bodyId, b2Vec2{snappedPos.x, targetY}, b2Rot_identity);
+            } else if (std::abs(movement.vy) > 0.1f) {
+                float col = std::round((snappedPos.x - MAZE_START_X - MAZE_TILE_SIZE * 0.5f) / MAZE_TILE_SIZE);
+                float targetX = MAZE_START_X + col * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f;
+                b2Body_SetTransform(bodyId, b2Vec2{targetX, snappedPos.y}, b2Rot_identity);
+            }
         }
 
-        int width = 32;
-        int height = 32;
-
-        if (e.has<CollisionComponent>())
-        {
-            auto& collision = e.get<CollisionComponent>();
-            width = collision.width;
-            height = collision.height;
-        }
+        // Get latest position for boundary/wrap checks
+        b2Vec2 finalPos = b2Body_GetPosition(bodyId);
 
         // Handle wrapping in side tunnels (row 14)
-        if (std::abs(position.y - 387.0f) < 5.0f) {
-            if (position.x + 16.0f < 70.0f) {
-                position.x = 742.0f - 16.0f;
-            } else if (position.x + 16.0f > 742.0f) {
-                position.x = 70.0f - 16.0f;
+        if (std::abs(finalPos.y - 403.0f) < 5.0f) {
+            if (finalPos.x < 70.0f) {
+                b2Body_SetTransform(bodyId, b2Vec2{742.0f, finalPos.y}, b2Rot_identity);
+            } else if (finalPos.x > 742.0f) {
+                b2Body_SetTransform(bodyId, b2Vec2{70.0f, finalPos.y}, b2Rot_identity);
             }
         } else {
-            if (position.x < mazeLeft) {
-                position.x = mazeLeft;
+            // Apply boundary clamping
+            float targetX = finalPos.x;
+            float targetY = finalPos.y;
+            if (finalPos.x < mazeLeft + 16.0f) {
+                targetX = mazeLeft + 16.0f;
+            } else if (finalPos.x > mazeRight - 16.0f) {
+                targetX = mazeRight - 16.0f;
             }
-            if (position.x + width > mazeRight) {
-                position.x = mazeRight - width;
+            if (finalPos.y < mazeTop + 16.0f) {
+                targetY = mazeTop + 16.0f;
+            } else if (finalPos.y > mazeBottom - 16.0f) {
+                targetY = mazeBottom - 16.0f;
+            }
+
+            if (targetX != finalPos.x || targetY != finalPos.y) {
+                b2Body_SetTransform(bodyId, b2Vec2{targetX, targetY}, b2Rot_identity);
             }
         }
-
-        if (position.y < mazeTop) {
-            position.y = mazeTop;
-        }
-
-        if (position.y + height > mazeBottom) {
-            position.y = mazeBottom - height;
-        }
-
     }
 }

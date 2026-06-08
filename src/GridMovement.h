@@ -17,10 +17,6 @@ inline void enforceCardinalMovement(MovementComponent& move) {
 }
 
 inline void snapEntityToGridLane(PositionComponent& pos, const MovementComponent& move) {
-    // Entities are 32x32. Their center coordinates are pos.x + 16, pos.y + 16.
-    // We snap them so that the entity center aligns with the tile center:
-    // tileCenterX = MAZE_START_X + col * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f
-    // tileCenterY = MAZE_START_Y + row * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f
     if (std::abs(move.vx) > 0.1f) {
         float row = std::round((pos.y + 16.0f - MAZE_START_Y - MAZE_TILE_SIZE * 0.5f) / MAZE_TILE_SIZE);
         pos.y = MAZE_START_Y + row * MAZE_TILE_SIZE + MAZE_TILE_SIZE * 0.5f - 16.0f;
