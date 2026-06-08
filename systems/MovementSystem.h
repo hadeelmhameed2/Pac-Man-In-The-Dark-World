@@ -11,4 +11,14 @@ public:
     void update(
         float deltaTime
     );
+
+    bool canMove(
+    float x,
+    float y,
+    int width,
+    int height,
+    Direction direction,
+    float probeDistance,
+    bool forgiving = false
+);
 };
