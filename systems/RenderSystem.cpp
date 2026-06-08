@@ -65,25 +65,16 @@ for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next())
             }
         }
     }
-    else
-    {
-        SDL_FRect rect = {
-            position.x,
-            position.y,
-            static_cast<float>(drawing.width),
-            static_cast<float>(drawing.height)
-        };
+    else if (e.has<DirectionComponent>()) { //ghosts
 
-        SDL_SetRenderDrawColor(
-            renderer,
-            drawing.r,
-            drawing.g,
-            drawing.b,
-            drawing.a
-        );
-
-        SDL_RenderFillRect(renderer, &rect);
     }
+    else if (e.has<CollisionComponent>()) { //wall
+
+    }
+    else { // flashlight, small and big dots
+
+    }
+
 }
 
 // Darkness / flashlight effects
