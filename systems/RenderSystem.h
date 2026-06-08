@@ -18,7 +18,6 @@ public:
 
 private:
     void drawMaze(SDL_Renderer* renderer);
-    void drawDots(SDL_Renderer* renderer);
     void drawGhosts(SDL_Renderer* renderer);
 
     void drawPacman(

@@ -1,4 +1,5 @@
 #include "RenderSystem.h"
+#include "Game.h"
 #include <vector>
 #include <string>
 
@@ -17,7 +18,6 @@ void RenderSystem::render(
     SDL_RenderClear(renderer);
 
     drawMaze(renderer);
-    drawDots(renderer);
     drawGhosts(renderer);
 
 
@@ -136,173 +136,129 @@ for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next())
 SDL_RenderPresent(renderer);
 }
 
-void RenderSystem::drawMaze(SDL_Renderer* renderer) {
-    const std::vector<std::string> maze = {
-        "############################",
-        "#............##............#",
-        "#.####.#####.##.#####.####.#",
-        "#o####.#####.##.#####.####o#",
-        "#.####.#####.##.#####.####.#",
-        "#..........................#",
-        "#.####.##.########.##.####.#",
-        "#.####.##.########.##.####.#",
-        "#......##....##....##......#",
-        "######.##### ## #####.######",
-        "     #.##### ## #####.#     ",
-        "     #.##          ##.#     ",
-        "     #.## ###--### ##.#     ",
-        "######.## #      # ##.######",
-        "      .   #      #   .      ",
-        "######.## #      # ##.######",
-        "     #.## ######## ##.#     ",
-        "     #.##          ##.#     ",
-        "     #.## ######## ##.#     ",
-        "######.## ######## ##.######",
-        "#............##............#",
-        "#.####.#####.##.#####.####.#",
-        "#o..##................##..o#",
-        "###.##.##.########.##.##.###",
-        "###.##.##.########.##.##.###",
-        "#......##....##....##......#",
-        "#.##########.##.##########.#",
-        "#.##########.##.##########.#",
-        "#..........................#",
-        "############################"
-    };
-
+void RenderSystem::drawMaze(SDL_Renderer* renderer)
+{
     const float tile = 24.0f;
     const float startX = 70.0f;
     const float startY = 55.0f;
 
-    for (int row = 0; row < static_cast<int>(maze.size()); ++row) {
-        for (int col = 0; col < static_cast<int>(maze[row].size()); ++col) {
+    for (int row = 0; row < static_cast<int>(maze.size()); ++row)
+    {
+        for (int col = 0; col < static_cast<int>(maze[row].size()); ++col)
+        {
             char cell = maze[row][col];
 
             float x = startX + col * tile;
             float y = startY + row * tile;
 
-            if (cell == '#') {
-                drawGlowRect(renderer, x, y, tile, tile);
+            float centerX = x + tile / 2.0f;
+            float centerY = y + tile / 2.0f;
+
+            switch (cell)
+            {
+                case '#':
+                {
+                    drawGlowRect(
+                        renderer,
+                        x,
+                        y,
+                        tile,
+                        tile
+                    );
+                    break;
+                }
+
+                case '.':
+                {
+                    drawFilledCircle(
+                        renderer,
+                        centerX,
+                        centerY,
+                        2.5f,
+                        235, 215, 185, 255
+                    );
+                    break;
+                }
+
+                case 'o':
+                {
+                    drawFilledCircle(
+                        renderer,
+                        centerX,
+                        centerY,
+                        6.0f,
+                        255, 220, 190, 255
+                    );
+                    break;
+                }
+
+                case 'F':
+                {
+                    drawFilledRect(
+                        renderer,
+                        centerX - 6.0f,
+                        centerY - 3.0f,
+                        10.0f,
+                        6.0f,
+                        180, 180, 180, 255
+                    );
+
+                    drawFilledRect(
+                        renderer,
+                        centerX + 4.0f,
+                        centerY - 4.0f,
+                        4.0f,
+                        8.0f,
+                        220, 220, 220, 255
+                    );
+
+                    drawFilledCircle(
+                        renderer,
+                        centerX - 6.0f,
+                        centerY,
+                        3.0f,
+                        120, 120, 120, 255
+                    );
+
+                    SDL_SetRenderDrawColor(
+                        renderer,
+                        255, 255, 180, 180
+                    );
+
+                    SDL_RenderLine(
+                        renderer,
+                        centerX + 8.0f,
+                        centerY,
+                        centerX + 14.0f,
+                        centerY - 4.0f
+                    );
+
+                    SDL_RenderLine(
+                        renderer,
+                        centerX + 8.0f,
+                        centerY,
+                        centerX + 14.0f,
+                        centerY + 4.0f
+                    );
+
+                    SDL_RenderLine(
+                        renderer,
+                        centerX + 8.0f,
+                        centerY,
+                        centerX + 16.0f,
+                        centerY
+                    );
+
+                    break;
+                }
+
+                default:
+                    break;
             }
         }
     }
 }
 
-void RenderSystem::drawDots(SDL_Renderer* renderer) {
-    const std::vector<std::string> maze = {
-        "############################",
-        "#............##............#",
-        "#.####.#####.##.#####.####.#",
-        "#o####.#####.##.#####.####o#",
-        "#.####.#####.##.#####.####.#",
-        "#.....F.............F......#",
-        "#.####.##.########.##.####.#",
-        "#.####.##.########.##.####.#",
-        "#......##....##....##......#",
-        "######.##### ## #####.######",
-        "     #.##### ## #####.#     ",
-        "     #.##          ##.#     ",
-        "     #.## ###--### ##.#     ",
-        "######.## #      # ##.######",
-        "      .   #      #   .      ",
-        "######F## #      # ##.######",
-        "     #.## ######## ##.#     ",
-        "     #.##          ##.#     ",
-        "     #.## ######## ##.#     ",
-        "######.## ######## ##F######",
-        "#............##............#",
-        "#.####.#####.##.#####.####.#",
-        "#o..##................##..o#",
-        "###.##.##.########.##.##.###",
-        "###.##.##.########.##.##.###",
-        "#......##....##....##......#",
-        "#.##########.##.##########.#",
-        "#.##########.##.##########.#",
-        "#..........................#",
-        "############################"
-    };
-
-    const float tile = 24.0f;
-    const float startX = 70.0f;
-    const float startY = 55.0f;
-
-    for (int row = 0; row < static_cast<int>(maze.size()); ++row) {
-        for (int col = 0; col < static_cast<int>(maze[row].size()); ++col) {
-            char cell = maze[row][col];
-
-            float centerX = startX + col * tile + tile / 2.0f;
-            float centerY = startY + row * tile + tile / 2.0f;
-
-            if (cell == '.') {
-                drawFilledCircle(renderer, centerX, centerY, 2.5f, 235, 215, 185, 255);
-            }
-            else if (cell == 'o') {
-                drawFilledCircle(renderer, centerX, centerY, 6.0f, 255, 220, 190, 255);
-            }
-            else if (cell == 'F') {
-                // flashlight body
-                drawFilledRect(
-                    renderer,
-                    centerX - 6.0f,
-                    centerY - 3.0f,
-                    10.0f,
-                    6.0f,
-                    180, 180, 180, 255
-                );
-
-                // flashlight head
-                drawFilledRect(
-                    renderer,
-                    centerX + 4.0f,
-                    centerY - 4.0f,
-                    4.0f,
-                    8.0f,
-                    220, 220, 220, 255
-                );
-
-                // handle cap
-                drawFilledCircle(
-                    renderer,
-                    centerX - 6.0f,
-                    centerY,
-                    3.0f,
-                    120, 120, 120, 255
-                );
-
-                // light beam
-                SDL_SetRenderDrawColor(
-                    renderer,
-                    255, 255, 180, 180
-                );
-
-                SDL_RenderLine(
-                    renderer,
-                    centerX + 8.0f,
-                    centerY,
-                    centerX + 14.0f,
-                    centerY - 4.0f
-                );
-
-                SDL_RenderLine(
-                    renderer,
-                    centerX + 8.0f,
-                    centerY,
-                    centerX + 14.0f,
-                    centerY + 4.0f
-                );
-
-                SDL_RenderLine(
-                    renderer,
-                    centerX + 8.0f,
-                    centerY,
-                    centerX + 16.0f,
-                    centerY
-                );
-
-            }
-        }
-    }
-}
 
 void RenderSystem::drawGhosts(SDL_Renderer* renderer) {
     drawGhost(renderer, 375, 370, 255, 0, 0);
