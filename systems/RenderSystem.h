@@ -6,6 +6,7 @@
 #include "Entity.h"
 #include "Components.h"
 #include "bagel.h"
+#define FLASHLIGHT_FILE "external/flashlittle.png"
 
 class RenderSystem {
 public:

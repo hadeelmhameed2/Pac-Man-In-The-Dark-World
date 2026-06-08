@@ -44,8 +44,6 @@ void Game::createWalls()
     const float startX = 70.0f;
     const float startY = 55.0f;
 
-    int count=0;
-
     for (int row = 0; row < static_cast<int>(maze.size()); ++row)
     {
         for (int col = 0; col < static_cast<int>(maze[row].size()); ++col)
@@ -72,11 +70,8 @@ void Game::createWalls()
                     true
                 }
             );
-            std::cout<<count++<<std::endl;
         }
     }
-
-    std::cout << "\n=== Wall Created ===\n";
 }
 
 void Game::createPacman() {

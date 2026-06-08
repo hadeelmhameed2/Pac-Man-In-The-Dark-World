@@ -195,7 +195,7 @@ void RenderSystem::drawDots(SDL_Renderer* renderer) {
         "#.####.#####.##.#####.####.#",
         "#o####.#####.##.#####.####o#",
         "#.####.#####.##.#####.####.#",
-        "#..........................#",
+        "#.....F.............F......#",
         "#.####.##.########.##.####.#",
         "#.####.##.########.##.####.#",
         "#......##....##....##......#",
@@ -205,11 +205,11 @@ void RenderSystem::drawDots(SDL_Renderer* renderer) {
         "     #.## ###--### ##.#     ",
         "######.## #      # ##.######",
         "      .   #      #   .      ",
-        "######.## #      # ##.######",
+        "######F## #      # ##.######",
         "     #.## ######## ##.#     ",
         "     #.##          ##.#     ",
         "     #.## ######## ##.#     ",
-        "######.## ######## ##.######",
+        "######.## ######## ##F######",
         "#............##............#",
         "#.####.#####.##.#####.####.#",
         "#o..##................##..o#",
@@ -238,6 +238,67 @@ void RenderSystem::drawDots(SDL_Renderer* renderer) {
             }
             else if (cell == 'o') {
                 drawFilledCircle(renderer, centerX, centerY, 6.0f, 255, 220, 190, 255);
+            }
+            else if (cell == 'F') {
+                // flashlight body
+                drawFilledRect(
+                    renderer,
+                    centerX - 6.0f,
+                    centerY - 3.0f,
+                    10.0f,
+                    6.0f,
+                    180, 180, 180, 255
+                );
+
+                // flashlight head
+                drawFilledRect(
+                    renderer,
+                    centerX + 4.0f,
+                    centerY - 4.0f,
+                    4.0f,
+                    8.0f,
+                    220, 220, 220, 255
+                );
+
+                // handle cap
+                drawFilledCircle(
+                    renderer,
+                    centerX - 6.0f,
+                    centerY,
+                    3.0f,
+                    120, 120, 120, 255
+                );
+
+                // light beam
+                SDL_SetRenderDrawColor(
+                    renderer,
+                    255, 255, 180, 180
+                );
+
+                SDL_RenderLine(
+                    renderer,
+                    centerX + 8.0f,
+                    centerY,
+                    centerX + 14.0f,
+                    centerY - 4.0f
+                );
+
+                SDL_RenderLine(
+                    renderer,
+                    centerX + 8.0f,
+                    centerY,
+                    centerX + 14.0f,
+                    centerY + 4.0f
+                );
+
+                SDL_RenderLine(
+                    renderer,
+                    centerX + 8.0f,
+                    centerY,
+                    centerX + 16.0f,
+                    centerY
+                );
+
             }
         }
     }
