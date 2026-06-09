@@ -20,6 +20,7 @@ add_executable(PacmanDarkWorld
 
         ecs/bagel.h
         ecs/Components.h
+        ecs/LightingComponents.h
 
         Systems/InputSystem.h
         Systems/InputSystem.cpp
@@ -35,6 +36,10 @@ add_executable(PacmanDarkWorld
         Systems/GhostAISystem.cpp
         Systems/VisibilitySystem.h
         Systems/VisibilitySystem.cpp
+        Systems/LightingSystem.h
+        Systems/LightingSystem.cpp
+        Systems/LightingDebugSystem.h
+        Systems/LightingDebugSystem.cpp
 )
 
 target_include_directories(PacmanDarkWorld PRIVATE
