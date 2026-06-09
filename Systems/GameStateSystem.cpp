@@ -4,6 +4,7 @@
 #include <box2d/box2d.h>
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 namespace {
     float entityCenterX(float x) {
@@ -38,7 +39,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
         .set<PositionComponent>()
         .build();
 
-    static int stateQ = bagel::World::createQuery(stateMask);
+    int stateQ = bagel::World::createQuery(stateMask);
     static int ghostQ = bagel::World::createQuery(ghostMask);
 
     const auto& pacPos = bagel::World::getComponent<PositionComponent>(pacmanId);
@@ -67,12 +68,15 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
         statePtr = &stateEnt.get<GameStateComponent>();
     }
 
+
     if (statePtr != nullptr && !statePtr->isGameOver) {
         // 2. Dot & Energizer eating
         if (pacRow >= 0 && pacRow < MAZE_ROWS && pacCol >= 0 && pacCol < MAZE_COLS) {
+
             char& cell = MAZE_LAYOUT[pacRow][pacCol];
             if (cell == '.') {
                 cell = ' ';
+
                 statePtr->score += 10;
             } else if (cell == 'o') {
                 cell = ' ';
@@ -83,6 +87,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
 
         // 3. Set ghost state to Frightened if timer is active
         for (bagel::Entity ghost = bagel::World::first(ghostQ); !bagel::World::eof(ghostQ); ghost = bagel::World::next(ghostQ)) {
+
             auto& ai = ghost.get<GhostAI>();
             if (frightenedTimer > 0.0f) {
                 if (ai.state != GhostState::EATEN) {
