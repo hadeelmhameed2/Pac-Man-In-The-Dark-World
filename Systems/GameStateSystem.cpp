@@ -39,7 +39,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
         .set<PositionComponent>()
         .build();
 
-    int stateQ = bagel::World::createQuery(stateMask);
+    static int stateQ = bagel::World::createQuery(stateMask);
     static int ghostQ = bagel::World::createQuery(ghostMask);
 
     const auto& pacPos = bagel::World::getComponent<PositionComponent>(pacmanId);
@@ -67,6 +67,11 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
         bagel::Entity stateEnt = bagel::World::first(stateQ);
         statePtr = &stateEnt.get<GameStateComponent>();
     }
+    else {
+        stateQ = bagel::World::createQuery(stateMask);
+        bagel::Entity stateEnt = bagel::World::first(stateQ);
+        statePtr = &stateEnt.get<GameStateComponent>();
+    }
 
 
     if (statePtr != nullptr && !statePtr->isGameOver) {
@@ -82,6 +87,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
                 cell = ' ';
                 statePtr->score += 50;
                 frightenedTimer = 7.0f; // Frightened mode lasts 7 seconds
+                RenderSystem::ghostState = GhostState::FRIGHTENED;
             }
         }
 
@@ -96,6 +102,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
             } else {
                 if (ai.state == GhostState::FRIGHTENED) {
                     ai.state = GhostState::SCATTER; // Fallback to normal behavior
+                    RenderSystem::ghostState = GhostState::SCATTER;
                 }
             }
         }
@@ -111,7 +118,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
             const float dy = ghostCenterY_logical - pacCenterY_logical;
             const float dist = std::sqrt(dx * dx + dy * dy);
 
-            if (dist < 24.0f) {
+            if (dist < 24.0f) { //Collision
                 if (ai.state == GhostState::FRIGHTENED) {
                     // Pacman eats the ghost
                     ai.state = GhostState::EATEN;
@@ -137,6 +144,20 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
                         if (bagel::World::mask(pacmanId).test(bagel::Component<BatteryLifeComponent>::Bit)) {
                             auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
                             battery.current -= 35.0f; // Lose 35% battery
+
+                            // Send the ghost back to the ghost house
+                            ghostPos.x = GHOST_HOUSE_X - 16.0f;
+                            ghostPos.y = GHOST_HOUSE_Y - 16.0f;
+
+                            auto& ghostMove = ghost.get<MovementComponent>();
+                            ghostMove.vx = 0.0f;
+                            ghostMove.vy = 0.0f;
+
+                            if (ghost.has<PhysicsComponent>()) {
+                                b2BodyId bodyId = ghost.get<PhysicsComponent>().bodyId;
+                                b2Body_SetTransform(bodyId, b2Vec2{ GHOST_HOUSE_X, GHOST_HOUSE_Y }, b2Rot_identity);
+                                b2Body_SetLinearVelocity(bodyId, b2Vec2{ 0.0f, 0.0f });
+                            }
                             if (battery.current < 0.0f) {
                                 battery.current = 0.0f;
                             }

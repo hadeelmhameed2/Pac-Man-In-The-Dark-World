@@ -153,6 +153,8 @@ namespace {
     }
 }
 
+GhostState RenderSystem::ghostState = GhostState::SCATTER;
+
 void RenderSystem::render(
     SDL_Renderer* renderer,
     VisionMode visionMode
@@ -239,6 +241,7 @@ void RenderSystem::render(
         if (e.has<InputComponent>())
         {
             auto& direction = e.get<DirectionComponent>();
+
             drawPacman(renderer, position, drawing, direction);
         }
         else if (e.has<GhostAI>())
@@ -548,6 +551,9 @@ void RenderSystem::drawPacman(
     float centerX = position.x + static_cast<float>(drawing.width) / 2.0f;
     float centerY = position.y + static_cast<float>(drawing.height) / 2.0f;
     float radius = static_cast<float>(drawing.width) / 2.0f;
+
+    if (ghostState == GhostState::FRIGHTENED)
+        radius += 3.0;
 
     drawFilledCircle(renderer, centerX, centerY, radius, 255, 255, 0, 255);
 
