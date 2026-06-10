@@ -64,4 +64,3 @@ template <> struct bagel::Storage<ChargerComponent> final : bagel::NoInstance {
     using type = bagel::PackedStorage<ChargerComponent>;
 };
 
-

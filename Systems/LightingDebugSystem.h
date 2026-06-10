@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include "../ecs/LightingComponents.h"
+#include "LightingComponents.h"
 
 // LightingDebugSystem owns the tiny on-screen debug overlay for the battery
 // / power-mode feature set. It stays isolated from the team-owned systems and
@@ -59,5 +59,3 @@ private:
 
     static const char* powerModeToString(PowerMode mode);
 };
-
-

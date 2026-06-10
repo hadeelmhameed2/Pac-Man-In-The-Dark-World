@@ -3,7 +3,7 @@
 #include <SDL3/SDL.h>
 #include "bagel.h"
 #include "Components.h"
-#include "../ecs/LightingComponents.h"
+#include "LightingComponents.h"
 
 // LightingSystem is responsible for computing which entities are lit by the
 // player (and other light sources) and updating their VisibilityComponent
@@ -22,4 +22,5 @@ public:
     // it over the scene with SDL_RenderTexture(...).
     SDL_Texture* getShadowMaskTexture() const;
 };
+
 
