@@ -89,6 +89,11 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
                 frightenedTimer = 7.0f; // Frightened mode lasts 7 seconds
                 RenderSystem::ghostState = GhostState::FRIGHTENED;
             }
+            else if (cell == 'F') {
+                auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
+                battery.current = std::min(100.0f,battery.current + 20);
+                cell = ' ';
+            }
         }
 
         // 3. Set ghost state to Frightened if timer is active
