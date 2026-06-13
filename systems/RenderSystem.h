@@ -8,7 +8,9 @@ class RenderSystem {
 public:
     void render(
         SDL_Renderer* renderer,
-        VisionMode visionMode
+        VisionMode visionMode,
+        SDL_Texture* gameOverTexture,
+        SDL_Texture* victoryTexture
     );
     void drawStatus(SDL_Window* window,VisionMode visionMode);
     static GhostState ghostState;

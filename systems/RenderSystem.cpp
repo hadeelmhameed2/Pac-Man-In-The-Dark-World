@@ -157,7 +157,9 @@ GhostState RenderSystem::ghostState = GhostState::SCATTER;
 
 void RenderSystem::render(
     SDL_Renderer* renderer,
-    VisionMode visionMode
+    VisionMode visionMode,
+    SDL_Texture* gameOverTexture,
+    SDL_Texture* victoryTexture
 ) {
     if (renderer == nullptr) {
         return;
@@ -379,6 +381,44 @@ void RenderSystem::render(
             bool lit = isGhostLit(position.x, position.y, px, py, pacmanDir, flashlightOn, visionMode, lightRadius);
             if (!lit) {
                 drawGlowingEyes(renderer, position.x, position.y, drawing.r, drawing.g, drawing.b, 255);
+            }
+        }
+    }
+
+    // Draw Custom Image End Screens if Game Over
+    if (isGameOver) {
+        bool isVictory = false;
+        if (!bagel::World::eof(stateQ)) {
+            bagel::Entity stateEnt = bagel::World::first(stateQ);
+            isVictory = stateEnt.get<GameStateComponent>().shownVictoryPopup;
+        }
+
+        SDL_Texture* activeTexture = isVictory ? victoryTexture : gameOverTexture;
+        if (activeTexture != nullptr) {
+            SDL_RenderTexture(renderer, activeTexture, nullptr, nullptr);
+
+            // Handle hover highlights
+            float mx = 0.0f, my = 0.0f;
+            SDL_GetMouseState(&mx, &my);
+
+            SDL_FRect newGameRect = { 300.0f, 500.0f, 200.0f, 60.0f };
+            SDL_FRect exitRect = { 550.0f, 500.0f, 200.0f, 60.0f };
+
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+            if (mx >= newGameRect.x && mx <= newGameRect.x + newGameRect.w &&
+                my >= newGameRect.y && my <= newGameRect.y + newGameRect.h) {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 40);
+                SDL_RenderFillRect(renderer, &newGameRect);
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 200);
+                SDL_RenderRect(renderer, &newGameRect);
+            }
+            if (mx >= exitRect.x && mx <= exitRect.x + exitRect.w &&
+                my >= exitRect.y && my <= exitRect.y + exitRect.h) {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 40);
+                SDL_RenderFillRect(renderer, &exitRect);
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 200);
+                SDL_RenderRect(renderer, &exitRect);
             }
         }
     }

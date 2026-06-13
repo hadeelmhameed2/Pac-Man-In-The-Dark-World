@@ -8,7 +8,8 @@
 class InputSystem {
 public:
     void handleInput(
-    bool& running,
-    VisionMode& visionMode
-);
+        bool& running,
+        VisionMode& visionMode,
+        bool& resetRequested
+    );
 };

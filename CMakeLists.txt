@@ -8,6 +8,12 @@ set(SDL_STATIC ON)
 set(SDL_SHARED OFF)
 
 add_subdirectory(libs/SDL)
+
+set(SDLIMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+add_subdirectory(libs/SDL_image)
 add_subdirectory(libs/box2d/box2d-main)
 
 add_executable(PacmanDarkWorld
@@ -52,5 +58,12 @@ target_include_directories(PacmanDarkWorld PRIVATE
 
 target_link_libraries(PacmanDarkWorld PRIVATE
         SDL3-static
+        SDL3_image::SDL3_image
         box2d
+)
+
+add_custom_command(TARGET PacmanDarkWorld POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/images"
+        "$<TARGET_FILE_DIR:PacmanDarkWorld>/images"
 )
