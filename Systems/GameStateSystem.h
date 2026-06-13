@@ -1,6 +1,7 @@
 #pragma once
 #include "bagel.h"
 #include "Components.h"
+#include "RenderSystem.h"
 
 class GameStateSystem {
 public:

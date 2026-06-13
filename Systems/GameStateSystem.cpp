@@ -4,6 +4,7 @@
 #include <box2d/box2d.h>
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 namespace {
     float entityCenterX(float x) {
@@ -66,23 +67,38 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
         bagel::Entity stateEnt = bagel::World::first(stateQ);
         statePtr = &stateEnt.get<GameStateComponent>();
     }
+    else {
+        stateQ = bagel::World::createQuery(stateMask);
+        bagel::Entity stateEnt = bagel::World::first(stateQ);
+        statePtr = &stateEnt.get<GameStateComponent>();
+    }
+
 
     if (statePtr != nullptr && !statePtr->isGameOver) {
         // 2. Dot & Energizer eating
         if (pacRow >= 0 && pacRow < MAZE_ROWS && pacCol >= 0 && pacCol < MAZE_COLS) {
+
             char& cell = MAZE_LAYOUT[pacRow][pacCol];
             if (cell == '.') {
                 cell = ' ';
+
                 statePtr->score += 10;
             } else if (cell == 'o') {
                 cell = ' ';
                 statePtr->score += 50;
                 frightenedTimer = 7.0f; // Frightened mode lasts 7 seconds
+                RenderSystem::ghostState = GhostState::FRIGHTENED;
+            }
+            else if (cell == 'F') {
+                auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
+                battery.current = std::min(100.0f,battery.current + 20);
+                cell = ' ';
             }
         }
 
         // 3. Set ghost state to Frightened if timer is active
         for (bagel::Entity ghost = bagel::World::first(ghostQ); !bagel::World::eof(ghostQ); ghost = bagel::World::next(ghostQ)) {
+
             auto& ai = ghost.get<GhostAI>();
             if (frightenedTimer > 0.0f) {
                 if (ai.state != GhostState::EATEN) {
@@ -91,6 +107,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
             } else {
                 if (ai.state == GhostState::FRIGHTENED) {
                     ai.state = GhostState::SCATTER; // Fallback to normal behavior
+                    RenderSystem::ghostState = GhostState::SCATTER;
                 }
             }
         }
@@ -106,7 +123,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
             const float dy = ghostCenterY_logical - pacCenterY_logical;
             const float dist = std::sqrt(dx * dx + dy * dy);
 
-            if (dist < 24.0f) {
+            if (dist < 24.0f) { //Collision
                 if (ai.state == GhostState::FRIGHTENED) {
                     // Pacman eats the ghost
                     ai.state = GhostState::EATEN;
@@ -132,6 +149,20 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
                         if (bagel::World::mask(pacmanId).test(bagel::Component<BatteryLifeComponent>::Bit)) {
                             auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
                             battery.current -= 35.0f; // Lose 35% battery
+
+                            // Send the ghost back to the ghost house
+                            ghostPos.x = GHOST_HOUSE_X - 16.0f;
+                            ghostPos.y = GHOST_HOUSE_Y - 16.0f;
+
+                            auto& ghostMove = ghost.get<MovementComponent>();
+                            ghostMove.vx = 0.0f;
+                            ghostMove.vy = 0.0f;
+
+                            if (ghost.has<PhysicsComponent>()) {
+                                b2BodyId bodyId = ghost.get<PhysicsComponent>().bodyId;
+                                b2Body_SetTransform(bodyId, b2Vec2{ GHOST_HOUSE_X, GHOST_HOUSE_Y }, b2Rot_identity);
+                                b2Body_SetLinearVelocity(bodyId, b2Vec2{ 0.0f, 0.0f });
+                            }
                             if (battery.current < 0.0f) {
                                 battery.current = 0.0f;
                             }

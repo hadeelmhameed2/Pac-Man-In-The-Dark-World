@@ -11,6 +11,7 @@ public:
         VisionMode visionMode
     );
     void drawStatus(SDL_Window* window,VisionMode visionMode);
+    static GhostState ghostState;
 
 private:
     void drawMaze(SDL_Renderer* renderer);

@@ -153,6 +153,8 @@ namespace {
     }
 }
 
+GhostState RenderSystem::ghostState = GhostState::SCATTER;
+
 void RenderSystem::render(
     SDL_Renderer* renderer,
     VisionMode visionMode
@@ -239,6 +241,7 @@ void RenderSystem::render(
         if (e.has<InputComponent>())
         {
             auto& direction = e.get<DirectionComponent>();
+
             drawPacman(renderer, position, drawing, direction);
         }
         else if (e.has<GhostAI>())
@@ -412,6 +415,63 @@ void RenderSystem::drawDots(SDL_Renderer* renderer) {
             else if (cell == 'o') {
                 drawFilledCircle(renderer, centerX, centerY, 6.0f, 255, 220, 190, 255);
             }
+            else if (cell=='F')
+            {
+                drawFilledRect(
+                    renderer,
+                    centerX - 6.0f,
+                    centerY - 3.0f,
+                    10.0f,
+                    6.0f,
+                    180, 180, 180, 255
+                );
+
+                drawFilledRect(
+                    renderer,
+                    centerX + 4.0f,
+                    centerY - 4.0f,
+                    4.0f,
+                    8.0f,
+                    220, 220, 220, 255
+                );
+
+                drawFilledCircle(
+                    renderer,
+                    centerX - 6.0f,
+                    centerY,
+                    3.0f,
+                    120, 120, 120, 255
+                );
+
+                SDL_SetRenderDrawColor(
+                    renderer,
+                    255, 255, 180, 180
+                );
+
+                SDL_RenderLine(
+                    renderer,
+                    centerX + 8.0f,
+                    centerY,
+                    centerX + 14.0f,
+                    centerY - 4.0f
+                );
+
+                SDL_RenderLine(
+                    renderer,
+                    centerX + 8.0f,
+                    centerY,
+                    centerX + 14.0f,
+                    centerY + 4.0f
+                );
+
+                SDL_RenderLine(
+                    renderer,
+                    centerX + 8.0f,
+                    centerY,
+                    centerX + 16.0f,
+                    centerY
+                );
+            }
         }
     }
 }
@@ -491,6 +551,9 @@ void RenderSystem::drawPacman(
     float centerX = position.x + static_cast<float>(drawing.width) / 2.0f;
     float centerY = position.y + static_cast<float>(drawing.height) / 2.0f;
     float radius = static_cast<float>(drawing.width) / 2.0f;
+
+    if (ghostState == GhostState::FRIGHTENED)
+        radius += 3.0;
 
     drawFilledCircle(renderer, centerX, centerY, radius, 255, 255, 0, 255);
 
