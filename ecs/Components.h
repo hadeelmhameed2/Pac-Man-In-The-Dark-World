@@ -74,6 +74,8 @@ struct GameStateComponent {
     bool isGameOver = false;
     bool isLowBattery = false;
     int nearbyGhosts = 0;
+    bool shownGameOverPopup = false;
+    bool shownVictoryPopup = false;
 };
 
 struct DirectionComponent {

@@ -2,6 +2,8 @@
 
 #include <SDL3/SDL.h>
 #include <box2d/box2d.h>
+#include <vector>
+#include <string>
 
 #include "bagel.h"
 #include "Components.h"
@@ -24,6 +26,7 @@ private:
     void createGhosts();
     void updateSystems(float deltaTime);
     void applyGhostGridMovement();
+    void reset();
 
 private:
     SDL_Window* window = nullptr;
@@ -31,6 +34,11 @@ private:
 
     bool running = false;
     VisionMode visionMode = VisionMode::Full;
+    bool wasBatteryAbove50 = true;
+
+    SDL_Texture* gameOverTexture = nullptr;
+    SDL_Texture* victoryTexture = nullptr;
+    std::vector<std::string> initialMazeLayout;
 
     InputSystem inputSystem;
     MovementSystem movementSystem;

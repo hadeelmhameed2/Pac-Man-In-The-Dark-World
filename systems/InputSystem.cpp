@@ -1,12 +1,48 @@
 #include "InputSystem.h"
 
-void InputSystem::handleInput(bool& running, VisionMode& visionMode) {
+void InputSystem::handleInput(bool& running, VisionMode& visionMode, bool& resetRequested) {
 
     SDL_Event event;
+
+    static const bagel::Mask stateMask = bagel::MaskBuilder()
+        .set<GameStateComponent>()
+        .build();
+    static int stateQ = bagel::World::createQuery(stateMask);
+    bool isGameOver = false;
+    if (!bagel::World::eof(stateQ)) {
+        bagel::Entity stateEnt = bagel::World::first(stateQ);
+        isGameOver = stateEnt.get<GameStateComponent>().isGameOver;
+    }
 
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
             running = false;
+        }
+
+        if (isGameOver) {
+            if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT) {
+                float mx = event.button.x;
+                float my = event.button.y;
+
+                SDL_FRect newGameRect = { 300.0f, 500.0f, 200.0f, 60.0f };
+                SDL_FRect exitRect = { 550.0f, 500.0f, 200.0f, 60.0f };
+
+                if (mx >= newGameRect.x && mx <= newGameRect.x + newGameRect.w &&
+                    my >= newGameRect.y && my <= newGameRect.y + newGameRect.h) {
+                    resetRequested = true;
+                }
+                else if (mx >= exitRect.x && mx <= exitRect.x + exitRect.w &&
+                         my >= exitRect.y && my <= exitRect.y + exitRect.h) {
+                    running = false;
+                }
+            }
+
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE) {
+                running = false;
+                return;
+            }
+
+            continue;
         }
 
         if (event.type == SDL_EVENT_KEY_DOWN) {
