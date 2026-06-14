@@ -81,4 +81,21 @@ private:
         Uint8 b,
         Uint8 a
     );
+
+    void drawButtonHoverEffect(
+        SDL_Renderer* renderer,
+        const SDL_FRect& buttonRect,
+        float SCALE_X,
+        float SCALE_Y,
+        bool isVictory
+    );
+
+    void drawSingleFlashlight(
+        SDL_Renderer* renderer,
+        float lensX,
+        float flashY,
+        float SCALE_X,
+        float SCALE_Y,
+        bool pointsRight
+    );
 };
