@@ -1,4 +1,5 @@
 #include "InputSystem.h"
+#include "Constants.h"
 
 void InputSystem::handleInput(bool& running, VisionMode& visionMode, bool& resetRequested) {
 
@@ -24,8 +25,11 @@ void InputSystem::handleInput(bool& running, VisionMode& visionMode, bool& reset
                 float mx = event.button.x;
                 float my = event.button.y;
 
-                SDL_FRect newGameRect = { 300.0f, 500.0f, 200.0f, 60.0f };
-                SDL_FRect exitRect = { 550.0f, 500.0f, 200.0f, 60.0f };
+                float SCALE_X = static_cast<float>(WINDOW_WIDTH) / 1920.0f;
+                float SCALE_Y = static_cast<float>(WINDOW_HEIGHT) / 1080.0f;
+
+                SDL_FRect newGameRect = { PLAY_AGAIN_X * SCALE_X, PLAY_AGAIN_Y * SCALE_Y, PLAY_AGAIN_W * SCALE_X, PLAY_AGAIN_H * SCALE_Y };
+                SDL_FRect exitRect = { QUIT_GAME_X * SCALE_X, QUIT_GAME_Y * SCALE_Y, QUIT_GAME_W * SCALE_X, QUIT_GAME_H * SCALE_Y };
 
                 if (mx >= newGameRect.x && mx <= newGameRect.x + newGameRect.w &&
                     my >= newGameRect.y && my <= newGameRect.y + newGameRect.h) {

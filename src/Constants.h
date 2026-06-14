@@ -27,3 +27,14 @@ constexpr float GHOST_HOUSE_Y = WINDOW_HEIGHT * 0.5f;
 constexpr uint64_t CATEGORY_WALL = 0x0001;
 constexpr uint64_t CATEGORY_PACMAN = 0x0002;
 constexpr uint64_t CATEGORY_GHOST = 0x0004;
+
+// BUTTON CALIBRATION: Pixel boundaries based on the 1920x1080 resolution asset
+constexpr float PLAY_AGAIN_X = 238.0f;
+constexpr float PLAY_AGAIN_Y = 848.0f;
+constexpr float PLAY_AGAIN_W = 582.0f;
+constexpr float PLAY_AGAIN_H = 144.0f;
+
+constexpr float QUIT_GAME_X  = 1100.0f;
+constexpr float QUIT_GAME_Y  = 848.0f;
+constexpr float QUIT_GAME_W  = 582.0f;
+constexpr float QUIT_GAME_H  = 144.0f;

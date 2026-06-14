@@ -401,24 +401,21 @@ void RenderSystem::render(
             float mx = 0.0f, my = 0.0f;
             SDL_GetMouseState(&mx, &my);
 
-            SDL_FRect newGameRect = { 300.0f, 500.0f, 200.0f, 60.0f };
-            SDL_FRect exitRect = { 550.0f, 500.0f, 200.0f, 60.0f };
+            float SCALE_X = static_cast<float>(WINDOW_WIDTH) / 1920.0f;
+            float SCALE_Y = static_cast<float>(WINDOW_HEIGHT) / 1080.0f;
+
+            SDL_FRect newGameRect = { PLAY_AGAIN_X * SCALE_X, PLAY_AGAIN_Y * SCALE_Y, PLAY_AGAIN_W * SCALE_X, PLAY_AGAIN_H * SCALE_Y };
+            SDL_FRect exitRect = { QUIT_GAME_X * SCALE_X, QUIT_GAME_Y * SCALE_Y, QUIT_GAME_W * SCALE_X, QUIT_GAME_H * SCALE_Y };
 
             SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
             if (mx >= newGameRect.x && mx <= newGameRect.x + newGameRect.w &&
                 my >= newGameRect.y && my <= newGameRect.y + newGameRect.h) {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 40);
-                SDL_RenderFillRect(renderer, &newGameRect);
-                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 200);
-                SDL_RenderRect(renderer, &newGameRect);
+                drawButtonHoverEffect(renderer, newGameRect, SCALE_X, SCALE_Y, isVictory);
             }
             if (mx >= exitRect.x && mx <= exitRect.x + exitRect.w &&
                 my >= exitRect.y && my <= exitRect.y + exitRect.h) {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 40);
-                SDL_RenderFillRect(renderer, &exitRect);
-                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 200);
-                SDL_RenderRect(renderer, &exitRect);
+                drawButtonHoverEffect(renderer, exitRect, SCALE_X, SCALE_Y, isVictory);
             }
         }
     }
@@ -760,4 +757,129 @@ void RenderSystem::drawFilledCircle(
             }
         }
     }
+}
+
+void RenderSystem::drawButtonHoverEffect(
+    SDL_Renderer* renderer,
+    const SDL_FRect& buttonRect,
+    float SCALE_X,
+    float SCALE_Y,
+    bool isVictory
+) {
+    float flashY = buttonRect.y + buttonRect.h * 0.5f;
+
+    // Dimensions for layout
+    float lensW = 4.0f * SCALE_X;
+    float lensCenterX_left = buttonRect.x + 8.0f * SCALE_X;
+    float lensCenterX_right = buttonRect.x + buttonRect.w - 8.0f * SCALE_X - lensW;
+
+    // 1. Draw Left Flashlight (pointing Right, aiming inwards)
+    drawSingleFlashlight(renderer, lensCenterX_left, flashY, SCALE_X, SCALE_Y, true);
+
+    // 2. Draw Right Flashlight (pointing Left, aiming inwards)
+    drawSingleFlashlight(renderer, lensCenterX_right, flashY, SCALE_X, SCALE_Y, false);
+
+    // 3. Draw Left Flashlight Light Beam
+    float beamStartX_left = lensCenterX_left + lensW;
+    float beamLength = buttonRect.w * 0.5f - 8.0f * SCALE_X - lensW;
+    float beamSpread = buttonRect.h * 0.45f;
+
+    SDL_Vertex verticesL[3];
+    verticesL[0].position = { beamStartX_left, flashY };
+    verticesL[0].color = { 255.0f/255.0f, 255.0f/255.0f, 220.0f/255.0f, 150.0f/255.0f }; // soft yellow glow at source
+
+    verticesL[1].position = { beamStartX_left + beamLength, flashY - beamSpread };
+    verticesL[1].color = { 255.0f/255.0f, 255.0f/255.0f, 220.0f/255.0f, 10.0f/255.0f }; // fade out
+
+    verticesL[2].position = { beamStartX_left + beamLength, flashY + beamSpread };
+    verticesL[2].color = { 255.0f/255.0f, 255.0f/255.0f, 220.0f/255.0f, 10.0f/255.0f }; // fade out
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_RenderGeometry(renderer, nullptr, verticesL, 3, nullptr, 0);
+
+    // 4. Draw Right Flashlight Light Beam
+    float beamStartX_right = lensCenterX_right;
+    float beamLength_right = lensCenterX_right - (buttonRect.x + buttonRect.w * 0.5f);
+
+    SDL_Vertex verticesR[3];
+    verticesR[0].position = { beamStartX_right, flashY };
+    verticesR[0].color = { 255.0f/255.0f, 255.0f/255.0f, 220.0f/255.0f, 150.0f/255.0f };
+
+    verticesR[1].position = { beamStartX_right - beamLength_right, flashY - beamSpread };
+    verticesR[1].color = { 255.0f/255.0f, 255.0f/255.0f, 220.0f/255.0f, 10.0f/255.0f };
+
+    verticesR[2].position = { beamStartX_right - beamLength_right, flashY + beamSpread };
+    verticesR[2].color = { 255.0f/255.0f, 255.0f/255.0f, 220.0f/255.0f, 10.0f/255.0f };
+
+    SDL_RenderGeometry(renderer, nullptr, verticesR, 3, nullptr, 0);
+}
+
+void RenderSystem::drawSingleFlashlight(
+    SDL_Renderer* renderer,
+    float lensX,
+    float flashY,
+    float SCALE_X,
+    float SCALE_Y,
+    bool pointsRight
+) {
+    // Dimensions
+    float bodyW = 40.0f * SCALE_X;
+    float bodyH = 16.0f * SCALE_Y;
+    float headW = 12.0f * SCALE_X;
+    float headH = 42.0f * SCALE_Y;
+    float lensW = 4.0f * SCALE_X;
+    float lensH = 36.0f * SCALE_Y;
+    float switchW = 8.0f * SCALE_X;
+    float switchH = 3.0f * SCALE_Y;
+
+    float headX = 0.0f;
+    float bodyX = 0.0f;
+    float switchX = 0.0f;
+
+    if (pointsRight) {
+        headX = lensX - headW;
+        bodyX = lensX - headW - bodyW;
+        switchX = bodyX + bodyW * 0.4f;
+    } else {
+        headX = lensX + lensW;
+        bodyX = lensX + lensW + headW;
+        switchX = bodyX + bodyW * 0.4f;
+    }
+
+    // Draw Switch (Red)
+    SDL_FRect switchRect = { switchX, flashY - bodyH * 0.5f - switchH, switchW, switchH };
+    SDL_SetRenderDrawColor(renderer, 220, 50, 50, 255);
+    SDL_RenderFillRect(renderer, &switchRect);
+
+    // Draw Body (Grey cylinder)
+    SDL_FRect bodyRect = { bodyX, flashY - bodyH * 0.5f, bodyW, bodyH };
+    SDL_SetRenderDrawColor(renderer, 85, 95, 105, 255);
+    SDL_RenderFillRect(renderer, &bodyRect);
+
+    // Draw red accent band on the body
+    float accentW = 4.0f * SCALE_X;
+    float accentX = pointsRight ? (bodyX + bodyW - accentW - 4.0f * SCALE_X) : (bodyX + 4.0f * SCALE_X);
+    SDL_FRect accentRect = { accentX, flashY - bodyH * 0.5f, accentW, bodyH };
+    SDL_SetRenderDrawColor(renderer, 220, 50, 50, 255);
+    SDL_RenderFillRect(renderer, &accentRect);
+
+    // Draw Bezel/Head (Dark grey flared - drawn with flared layers)
+    float headInnerW = headW * 0.4f;
+    float headInnerH = bodyH + (headH - bodyH) * 0.4f;
+    float headInnerX = pointsRight ? headX : (headX + headW - headInnerW);
+    SDL_FRect headInnerRect = { headInnerX, flashY - headInnerH * 0.5f, headInnerW, headInnerH };
+    SDL_SetRenderDrawColor(renderer, 60, 65, 75, 255);
+    SDL_RenderFillRect(renderer, &headInnerRect);
+
+    float headOuterW = headW * 0.6f;
+    float headOuterH = headH;
+    float headOuterX = pointsRight ? (headX + headInnerW) : headX;
+    SDL_FRect headOuterRect = { headOuterX, flashY - headOuterH * 0.5f, headOuterW, headOuterH };
+    SDL_SetRenderDrawColor(renderer, 50, 55, 65, 255);
+    SDL_RenderFillRect(renderer, &headOuterRect);
+
+    // Draw Lens (Bright yellow/white)
+    SDL_FRect lensRect = { lensX, flashY - lensH * 0.5f, lensW, lensH };
+    SDL_SetRenderDrawColor(renderer, 255, 255, 210, 255);
+    SDL_RenderFillRect(renderer, &lensRect);
 }
