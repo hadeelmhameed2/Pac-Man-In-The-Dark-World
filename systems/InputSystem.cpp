@@ -109,21 +109,11 @@ void InputSystem::handleInput(bool& running, VisionMode& visionMode, bool& reset
                     }
                 }
                 else if (event.key.key == 'f' || event.key.key == 'F') {
-                    if (
-                        flashlight.isAvailable &&
-                        battery.current > 0.0f
-                    ) {
-                        flashlight.isOn = !flashlight.isOn;
+                    if (!flashlight.isAvailable || battery.current <= 0.0f) {
+                        continue;
                     }
-                }
-                else if (event.key.key == '1') {
-                    visionMode = VisionMode::Full;
-                }
-                else if (event.key.key == '2') {
-                    visionMode = VisionMode::MediumDark;
-                }
-                else if (event.key.key == '3') {
-                    visionMode = VisionMode::FlashlightOnly;
+
+                    flashlight.isOn = !flashlight.isOn;
                 }
             }
         }

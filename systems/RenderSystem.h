@@ -10,7 +10,8 @@ public:
         SDL_Renderer* renderer,
         VisionMode visionMode,
         SDL_Texture* gameOverTexture,
-        SDL_Texture* victoryTexture
+        SDL_Texture* victoryTexture,
+        SDL_Texture* shadowMask = nullptr
     );
     void drawStatus(SDL_Window* window,VisionMode visionMode);
     static GhostState ghostState;

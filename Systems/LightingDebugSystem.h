@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include <string>
 #include "LightingComponents.h"
 
 // LightingDebugSystem owns the tiny on-screen debug overlay for the battery
@@ -57,5 +58,5 @@ private:
         Uint8 a
     );
 
-    static const char* powerModeToString(PowerMode mode);
+    static std::string powerModeToString(PowerMode mode);
 };

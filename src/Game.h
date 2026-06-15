@@ -12,6 +12,8 @@
 #include "MovementSystem.h"
 #include "RenderSystem.h"
 #include "BatterySystem.h"
+#include "LightingSystem.h"
+#include "ChargerSystem.h"
 
 class Game {
 public:
@@ -44,6 +46,8 @@ private:
     MovementSystem movementSystem;
     RenderSystem renderSystem;
     BatterySystem batterySystem;
+    LightingSystem lightingSystem;
+    ChargerSystem chargerSystem;
 
     bagel::ent_type pacman{};
     bagel::ent_type gameStateId{};

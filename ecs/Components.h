@@ -3,6 +3,7 @@
 #include "bagel.h"
 #include <SDL3/SDL.h>
 #include <box2d/id.h>
+#include "LightingComponents.h"
 
 enum class Direction {
     Up,
@@ -93,6 +94,8 @@ struct BatteryLifeComponent {
     float max = 100.0f;
     float normalDrainPerSecond = 0.3f;
     float flashlightDrainPerSecond = 1.2f;
+    PowerMode mode = PowerMode::Normal;
+    float boostRemaining = 0.0f;
 };
 
 template <> struct bagel::Storage<PositionComponent> final : bagel::NoInstance {

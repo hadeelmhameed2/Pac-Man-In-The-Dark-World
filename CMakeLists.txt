@@ -46,6 +46,8 @@ add_executable(PacmanDarkWorld
         Systems/LightingSystem.cpp
         Systems/LightingDebugSystem.h
         Systems/LightingDebugSystem.cpp
+        Systems/ChargerSystem.h
+        Systems/ChargerSystem.cpp
 )
 
 target_include_directories(PacmanDarkWorld PRIVATE

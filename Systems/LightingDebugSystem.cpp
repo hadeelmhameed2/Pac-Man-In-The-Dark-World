@@ -1,5 +1,7 @@
 #include "LightingDebugSystem.h"
+#include "Constants.h"
 #include <algorithm>
+#include <cmath>
 #include <cctype>
 #include <cstdio>
 
@@ -11,7 +13,7 @@ struct DebugOverlayState {
     float boostRemaining = 0.0f;
 };
 
-static DebugOverlayState gState;
+DebugOverlayState gState;
 
 // 5x7 bitmap font. We keep the set intentionally small and only cover the
 // characters needed for the debug overlay text.
@@ -40,6 +42,7 @@ constexpr GlyphRows GLYPH_D = {0b11100,0b10010,0b10001,0b10001,0b10001,0b10010,0
 constexpr GlyphRows GLYPH_E = {0b11111,0b10000,0b10000,0b11110,0b10000,0b10000,0b11111};
 constexpr GlyphRows GLYPH_G = {0b01110,0b10001,0b10000,0b10000,0b10011,0b10001,0b01110};
 constexpr GlyphRows GLYPH_I = {0b11111,0b00100,0b00100,0b00100,0b00100,0b00100,0b11111};
+constexpr GlyphRows GLYPH_L = {0b10000,0b10000,0b10000,0b10000,0b10000,0b10000,0b11111};
 constexpr GlyphRows GLYPH_M = {0b10001,0b11011,0b10101,0b10101,0b10001,0b10001,0b10001};
 constexpr GlyphRows GLYPH_N = {0b10001,0b11001,0b10101,0b10011,0b10001,0b10001,0b10001};
 constexpr GlyphRows GLYPH_O = {0b01110,0b10001,0b10001,0b10001,0b10001,0b10001,0b01110};
@@ -51,6 +54,7 @@ constexpr GlyphRows GLYPH_U = {0b10001,0b10001,0b10001,0b10001,0b10001,0b10001,0
 constexpr GlyphRows GLYPH_V = {0b10001,0b10001,0b10001,0b10001,0b01010,0b01010,0b00100};
 constexpr GlyphRows GLYPH_W = {0b10001,0b10001,0b10001,0b10101,0b10101,0b11011,0b10001};
 constexpr GlyphRows GLYPH_Y = {0b10001,0b01010,0b00100,0b00100,0b00100,0b00100,0b00100};
+constexpr GlyphRows GLYPH_F = {0b11111,0b10000,0b10000,0b11110,0b10000,0b10000,0b10000};
 
 const GlyphRows* glyphFor(char ch) {
     switch (ch) {
@@ -74,6 +78,7 @@ const GlyphRows* glyphFor(char ch) {
         case 'E': return &GLYPH_E;
         case 'G': return &GLYPH_G;
         case 'I': return &GLYPH_I;
+        case 'L': return &GLYPH_L;
         case 'M': return &GLYPH_M;
         case 'N': return &GLYPH_N;
         case 'O': return &GLYPH_O;
@@ -85,11 +90,12 @@ const GlyphRows* glyphFor(char ch) {
         case 'V': return &GLYPH_V;
         case 'W': return &GLYPH_W;
         case 'Y': return &GLYPH_Y;
+        case 'F': return &GLYPH_F;
         default:  return &GLYPH_SPACE;
     }
 }
 
-const char* modeLabel(PowerMode mode) {
+static const char* modeLabel(PowerMode mode) {
     switch (mode) {
         case PowerMode::Normal: return "NORMAL";
         case PowerMode::PowerSaving: return "POWER SAVING";
@@ -99,6 +105,10 @@ const char* modeLabel(PowerMode mode) {
     return "UNKNOWN";
 }
 } // namespace
+
+std::string LightingDebugSystem::powerModeToString(PowerMode mode) {
+    return modeLabel(mode);
+}
 
 void LightingDebugSystem::setState(float batteryCurrent, float batteryMax, PowerMode mode, float boostRemaining) {
     gState.batteryCurrent = batteryCurrent;
@@ -113,29 +123,59 @@ void LightingDebugSystem::renderOverlay(SDL_Renderer* renderer) {
     }
 
     const float fraction = (gState.batteryMax > 0.0f) ? (gState.batteryCurrent / gState.batteryMax) : 0.0f;
-    const int batteryPct = static_cast<int>(std::clamp(fraction, 0.0f, 1.0f) * 100.0f + 0.5f);
+    const int batteryPct = static_cast<int>(std::lround(std::clamp(fraction, 0.0f, 1.0f) * 100.0f));
+    const bool hasBoost = gState.boostRemaining > 0.0f;
+
+    auto batteryColor = [fraction]() -> SDL_Color {
+        if (fraction > 0.5f) return SDL_Color{76, 211, 127, 255};
+        if (fraction > 0.3f) return SDL_Color{242, 201, 76, 255};
+        return SDL_Color{235, 92, 92, 255};
+    };
+
+    auto modeColor = [](PowerMode mode) -> SDL_Color {
+        switch (mode) {
+            case PowerMode::Normal: return SDL_Color{76, 211, 127, 255};
+            case PowerMode::PowerSaving: return SDL_Color{242, 201, 76, 255};
+            case PowerMode::Boost: return SDL_Color{90, 200, 255, 255};
+            case PowerMode::OutOfPower: return SDL_Color{235, 92, 92, 255};
+        }
+        return SDL_Color{200, 200, 200, 255};
+    };
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    // Semi-transparent panel in the top-left corner.
-    drawFilledRect(renderer, 8, 8, 240, 76, 0, 0, 0, 160);
-    drawFilledRect(renderer, 10, 10, 236, 72, 18, 18, 26, 180);
+    // Full-width HUD bar at the top of the screen.
+    drawFilledRect(renderer, 0, 0, WINDOW_WIDTH, 72, 12, 14, 20, 200);
+    drawFilledRect(renderer, 0, 71, WINDOW_WIDTH, 1, 70, 78, 92, 220);
+    drawFilledRect(renderer, 0, 0, WINDOW_WIDTH, 4, 0, 0, 0, 60);
 
-    char batteryLine[64];
-    char modeLine[64];
-    char boostLine[64];
-    std::snprintf(batteryLine, sizeof(batteryLine), "BATTERY: %d%%", batteryPct);
-    std::snprintf(modeLine, sizeof(modeLine), "MODE: %s", modeLabel(gState.mode));
-    std::snprintf(boostLine, sizeof(boostLine), "BOOST: %.1fs", std::max(0.0f, gState.boostRemaining));
+    const SDL_Color batt = batteryColor();
+    const SDL_Color mode = modeColor(gState.mode);
 
-    drawText(renderer, 18, 18, batteryLine, 235, 235, 180, 255, 2);
-    drawText(renderer, 18, 34, modeLine, 170, 220, 255, 255, 2);
-    drawText(renderer, 18, 50, boostLine, 190, 255, 190, 255, 2);
+    // Battery section.
+    drawText(renderer, 16, 10, "BATTERY", 225, 230, 240, 255, 2);
+    drawFilledRect(renderer, 16, 30, 220, 18, 24, 28, 36, 220);
+    drawFilledRect(renderer, 18, 32, 216, 14, 45, 50, 64, 255);
+    drawFilledRect(renderer, 18, 32, static_cast<int>(216.0f * std::clamp(fraction, 0.0f, 1.0f)), 14, batt.r, batt.g, batt.b, 255);
 
-    // Tiny, always-on debug markers for the two test chargers.
-    // These are rendered in the same overlay pass so they sit above the scene.
-    drawFilledRect(renderer, 176, 96, 8, 8, 0, 255, 0, 255);   // green charger at (180, 100)
-    drawFilledRect(renderer, 246, 96, 8, 8, 0, 120, 255, 255); // blue boost pad at (250, 100)
+    char batteryPctText[16];
+    std::snprintf(batteryPctText, sizeof(batteryPctText), "%d%%", batteryPct);
+    drawText(renderer, 244, 28, batteryPctText, batt.r, batt.g, batt.b, 255, 2);
+
+    // Mode badge.
+    drawText(renderer, 316, 10, "MODE", 225, 230, 240, 255, 2);
+    drawFilledRect(renderer, 316, 30, 192, 18, mode.r, mode.g, mode.b, 220);
+    const std::string modeText = powerModeToString(gState.mode);
+    drawText(renderer, 328, 28, modeText.c_str(), 255, 255, 255, 255, 2);
+
+    // Boost countdown (only when active).
+    if (hasBoost) {
+        drawText(renderer, 528, 10, "BOOST", 225, 230, 240, 255, 2);
+        drawFilledRect(renderer, 528, 30, 168, 18, 22, 70, 95, 220);
+        char boostLine[32];
+        std::snprintf(boostLine, sizeof(boostLine), "BOOST: %.1fs", std::max(0.0f, gState.boostRemaining));
+        drawText(renderer, 536, 28, boostLine, 90, 200, 255, 255, 2);
+    }
 }
 
 void LightingDebugSystem::drawText(SDL_Renderer* renderer, int x, int y, const char* text, Uint8 r, Uint8 g, Uint8 b, Uint8 a, int scale) {

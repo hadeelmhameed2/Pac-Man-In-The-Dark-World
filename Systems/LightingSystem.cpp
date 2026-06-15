@@ -63,7 +63,7 @@ void drawConeCutout(SDL_Renderer* renderer, float centerX, float centerY, Direct
     SDL_RenderGeometry(renderer, nullptr, vertices, 3, nullptr, 0);
 }
 
-void clearShadowMask() {
+void clearShadowMask(Uint8 darknessAlpha) {
     if (gLightingRenderer == nullptr) {
         return;
     }
@@ -87,7 +87,7 @@ void clearShadowMask() {
 
     SDL_SetRenderTarget(gLightingRenderer, gShadowMaskTexture);
     SDL_SetRenderDrawBlendMode(gLightingRenderer, SDL_BLENDMODE_NONE);
-    SDL_SetRenderDrawColor(gLightingRenderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(gLightingRenderer, 0, 0, 0, darknessAlpha);
     SDL_FRect full = {0.0f, 0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT)};
     SDL_RenderFillRect(gLightingRenderer, &full);
 }
@@ -152,7 +152,7 @@ void LightingSystem::update(float deltaTime) {
     const auto& pflash = player.get<FlashlightComponent>();
     const auto& pbatt = player.get<BatteryLifeComponent>();
     const bool hasLightComp = player.has<LightComponent>();
-    auto* pLight = hasLightComp ? &player.get<LightComponent>() : nullptr;
+    LightComponent* pLight = hasLightComp ? &player.get<LightComponent>() : nullptr;
 
     // Player center (assume TILE_SIZE sized entity for centering consistency
     // with other systems that use TILE_SIZE). Using the entity's center is
@@ -167,6 +167,10 @@ void LightingSystem::update(float deltaTime) {
     // respect its settings; otherwise we fall back to the flashlight state.
     float effectiveRadius = hasLightComp ? pLight->baseRadius : LIGHT_RADIUS;
     effectiveRadius *= batteryFraction;
+    if (pbatt.current > 0.0f && pbatt.mode == PowerMode::PowerSaving) {
+        const float minimumRadius = (hasLightComp ? pLight->baseRadius : LIGHT_RADIUS) * 0.65f;
+        effectiveRadius = std::max(effectiveRadius, minimumRadius);
+    }
     const bool playerLightEnabled = hasLightComp ? (pLight->enabled && pflash.isOn && pbatt.current > 0.0f) : (pflash.isOn && pbatt.current > 0.0f);
     if (!playerLightEnabled) {
         effectiveRadius *= 0.0f;
@@ -261,14 +265,17 @@ void LightingSystem::update(float deltaTime) {
     // Build the shadow mask texture for Student 1 to composite on top of the
     // scene. The texture is solid black with transparent cutouts for lights.
     if (gLightingRenderer != nullptr) {
-        clearShadowMask();
+        const float batteryRatio = std::clamp(batteryFraction, 0.0f, 1.0f);
+        const Uint8 currentDarkness = static_cast<Uint8>((1.0f - batteryRatio) * 230.0f);
+
+        clearShadowMask(currentDarkness);
 
         if (gShadowMaskTexture != nullptr) {
             // First add the player's light cutout.
             const float pxCenter = px;
             const float pyCenter = py;
-            const float playerConeWidth = hasLightComp ? pLight->baseRadius * 0.85f : 120.0f;
             if (playerLightEnabled) {
+                const float playerConeWidth = hasLightComp ? pLight->baseRadius * 0.85f : 120.0f;
                 cutoutLight(
                     gLightingRenderer,
                     pxCenter,

@@ -6,6 +6,8 @@
 #include "GameStateSystem.h"
 #include "GhostAISystem.h"
 #include "VisibilitySystem.h"
+#include "LightingSystem.h"
+#include "LightingDebugSystem.h"
 
 namespace {
     SDL_FPoint scatterCorner(int ghostType) {
@@ -80,6 +82,9 @@ bool Game::init() {
         return false;
     }
 
+    // Initialize LightingSystem with the renderer
+    lightingSystem.setRenderer(renderer);
+
     gameOverTexture = IMG_LoadTexture(renderer, "images/GameOver.png");
     if (gameOverTexture == nullptr) {
         SDL_Log("Failed to load GameOver.png: %s", SDL_GetError());
@@ -118,6 +123,9 @@ bool Game::init() {
             }
         }
     }
+
+    // Initialize chargers from 'F' tiles in the maze
+    chargerSystem.initializeChargersFromMaze();
 
     createGameState();
     createPacman();
@@ -184,6 +192,12 @@ void Game::updateSystems(float deltaTime) {
     GameStateSystem::update(pacman, deltaTime);
     GhostAISystem::update(pacman, deltaTime);
     VisibilitySystem::update(pacman, gameStateId, deltaTime);
+
+    // Update lighting system to compute visibility and build shadow mask
+    lightingSystem.update(deltaTime);
+
+    // Update charger system to detect occupancy and apply effects
+    chargerSystem.update(deltaTime, pacman);
 }
 
 void Game::applyGhostGridMovement() {
@@ -248,7 +262,15 @@ void Game::run() {
         if (!isGameOver) {
             update(deltaTime);
         }
-        renderSystem.render(renderer, visionMode, gameOverTexture, victoryTexture);
+
+        // Render the scene with shadow mask and debug overlay composited
+        renderSystem.render(
+            renderer,
+            visionMode,
+            gameOverTexture,
+            victoryTexture,
+            lightingSystem.getShadowMaskTexture()
+        );
     }
 }
 

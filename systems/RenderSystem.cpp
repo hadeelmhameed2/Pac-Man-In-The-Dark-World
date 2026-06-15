@@ -1,6 +1,7 @@
 #include "RenderSystem.h"
 #include "Constants.h"
 #include "Maze.h"
+#include "LightingDebugSystem.h"
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -159,7 +160,8 @@ void RenderSystem::render(
     SDL_Renderer* renderer,
     VisionMode visionMode,
     SDL_Texture* gameOverTexture,
-    SDL_Texture* victoryTexture
+    SDL_Texture* victoryTexture,
+    SDL_Texture* shadowMask
 ) {
     if (renderer == nullptr) {
         return;
@@ -418,6 +420,16 @@ void RenderSystem::render(
                 drawButtonHoverEffect(renderer, exitRect, SCALE_X, SCALE_Y, isVictory);
             }
         }
+    }
+
+    // Composite the shadow mask from LightingSystem over the rendered scene
+    if (shadowMask != nullptr) {
+        SDL_RenderTexture(renderer, shadowMask, nullptr, nullptr);
+    }
+
+    // Render the debug overlay only while active gameplay is running.
+    if (!bagel::World::eof(stateQ) && !isGameOver) {
+        LightingDebugSystem::renderOverlay(renderer);
     }
 
     SDL_RenderPresent(renderer);
