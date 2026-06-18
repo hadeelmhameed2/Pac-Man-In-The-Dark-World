@@ -60,6 +60,10 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
     }
     if (invincibilityTimer > 0.0f) {
         invincibilityTimer -= deltaTime;
+        auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
+
+        //Reduce battery gradually
+        battery.current = battery.current - DAMAGE/(2.0/deltaTime);
     }
 
     GameStateComponent* statePtr = nullptr;
@@ -148,7 +152,12 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
                     if (invincibilityTimer <= 0.0f) {
                         if (bagel::World::mask(pacmanId).test(bagel::Component<BatteryLifeComponent>::Bit)) {
                             auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
-                            battery.current -= 35.0f; // Lose 35% battery
+                            // battery.current -= 35.0f; // Lose 35% battery
+
+                            if (battery.current <= 35.0f) //if pacman dies - reduce battery immediately
+                                battery.current = battery.current-35.0f;
+                            //otherwise - reduce battery gradually - upper code section
+
 
                             // Send the ghost back to the ghost house
                             ghostPos.x = GHOST_HOUSE_X - 16.0f;
