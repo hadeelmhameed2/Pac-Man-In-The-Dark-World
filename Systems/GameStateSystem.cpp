@@ -152,7 +152,6 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
                     if (invincibilityTimer <= 0.0f) {
                         if (bagel::World::mask(pacmanId).test(bagel::Component<BatteryLifeComponent>::Bit)) {
                             auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
-                            // battery.current -= 35.0f; // Lose 35% battery
 
                             if (battery.current <= 35.0f) //if pacman dies - reduce battery immediately
                                 battery.current = battery.current-35.0f;
