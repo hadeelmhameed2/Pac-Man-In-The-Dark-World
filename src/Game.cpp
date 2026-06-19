@@ -2,6 +2,7 @@
 #include "Constants.h"
 #include "GridMovement.h"
 #include <SDL3_image/SDL_image.h>
+#include "SoundManager.h"
 
 #include "GameStateSystem.h"
 #include "GhostAISystem.h"
@@ -59,6 +60,25 @@ namespace {
 bool Game::init() {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         return false;
+    }
+
+    if (SoundManager::getInstance().init()) {
+        SoundManager::getInstance().loadWAV("eating", "assets/audio/eating.wav");
+        SoundManager::getInstance().loadWAV("ghost_vulnerable", "assets/audio/ghost_vulnerable.wav");
+        SoundManager::getInstance().loadWAV("death", "assets/audio/death.wav");
+        SoundManager::getInstance().loadWAV("light_pellet", "assets/audio/light_pellet.wav");
+        SoundManager::getInstance().loadWAV("heartbeat", "assets/audio/heartbeat.wav");
+        SoundManager::getInstance().loadWAV("power_down", "assets/audio/power_down.wav");
+        SoundManager::getInstance().loadWAV("turbine_surge", "assets/audio/turbine_surge.wav");
+        SoundManager::getInstance().loadWAV("ambient_drone", "assets/audio/ambient_drone.wav");
+        SoundManager::getInstance().loadWAV("normal_bgm", "assets/audio/normal_bgm.wav");
+        SoundManager::getInstance().loadWAV("victory", "assets/audio/victory.wav");
+
+        // Start BGM track as a test
+        SoundManager::getInstance().playBGM("normal_bgm");
+        SoundManager::getInstance().setBGMVolume(0.5f);
+    } else {
+        SDL_Log("SoundManager init failed");
     }
 
     window = SDL_CreateWindow(
@@ -130,6 +150,7 @@ bool Game::init() {
     createGameState();
     createPacman();
     createGhosts();
+    createChargers();
 
     running = true;
     return true;
@@ -186,6 +207,24 @@ void Game::createGhosts() {
     spawnGhost(worldId, 2, 354.0f, 387.0f, -GHOST_SPEED, 0.0f, 0, 180, 255);
     // Spawn Clyde (orange, type 3) at col 15, row 14 (inside ghost house right)
     spawnGhost(worldId, 3, 426.0f, 387.0f, GHOST_SPEED, 0.0f, 255, 150, 0);
+}
+
+void Game::createChargers() {
+    // Green Charger at (180, 100)
+    bagel::Entity charger = bagel::Entity::create();
+    charger.addAll(
+        PositionComponent{ 180.0f - 16.0f, 100.0f - 16.0f },
+        ChargerComponent{ 25.0f, false },
+        VisibilityComponent{ true, 1.0f }
+    );
+
+    // Blue Boost Pad at (250, 100)
+    bagel::Entity boostPad = bagel::Entity::create();
+    boostPad.addAll(
+        PositionComponent{ 250.0f - 16.0f, 100.0f - 16.0f },
+        ChargerComponent{ 0.0f, true, 5.0f, 1.5f, 1.5f },
+        VisibilityComponent{ true, 1.0f }
+    );
 }
 
 void Game::updateSystems(float deltaTime) {
@@ -285,11 +324,14 @@ void Game::update(float deltaTime) {
             if (!wasBatteryAbove50) {
                 wasBatteryAbove50 = true;
                 visionMode = VisionMode::Full;
+                SoundManager::getInstance().playBGM("normal_bgm");
             }
         } else {
             if (wasBatteryAbove50) {
                 wasBatteryAbove50 = false;
                 visionMode = VisionMode::MediumDark;
+                SoundManager::getInstance().playSFX("power_down");
+                SoundManager::getInstance().playBGM("ambient_drone");
             }
         }
     }
@@ -419,6 +461,7 @@ void Game::reset() {
         b2Body_SetTransform(physics.bodyId, b2Vec2{ initialX + 16.0f, initialY + 16.0f }, b2Rot_identity);
         b2Body_SetLinearVelocity(physics.bodyId, b2Vec2{ initialVx, initialVy });
     }
+    SoundManager::getInstance().playBGM("normal_bgm");
 }
 
 void Game::clean() {
@@ -442,6 +485,8 @@ void Game::clean() {
     }
 
     b2DestroyWorld(worldId);
+
+    SoundManager::getInstance().clean();
 
     SDL_Quit();
 }

@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
+#include "SoundManager.h"
 
 namespace {
     float entityCenterX(float x) {
@@ -87,16 +88,35 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
                 cell = ' ';
 
                 statePtr->score += 10;
+                SoundManager::getInstance().playSFX("eating");
             } else if (cell == 'o') {
                 cell = ' ';
                 statePtr->score += 50;
                 frightenedTimer = 7.0f; // Frightened mode lasts 7 seconds
                 RenderSystem::ghostState = GhostState::FRIGHTENED;
-            }
-            else if (cell == 'F') {
+            } else if (cell == 'F') {
                 auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
-                battery.current = std::min(100.0f,battery.current + 20);
+                battery.current = std::min(100.0f, battery.current + 20.0f);
                 cell = ' ';
+                SoundManager::getInstance().playSFX("light_pellet");
+
+                // Find and destroy the corresponding charger entity
+                static const bagel::Mask chargerMask = bagel::MaskBuilder()
+                    .set<PositionComponent>()
+                    .set<ChargerComponent>()
+                    .build();
+                static int chargerQ = bagel::World::createQuery(chargerMask);
+                
+                float targetX = MAZE_START_X + pacCol * MAZE_TILE_SIZE;
+                float targetY = MAZE_START_Y + pacRow * MAZE_TILE_SIZE;
+                
+                for (bagel::Entity c = bagel::World::first(chargerQ); !bagel::World::eof(chargerQ); c = bagel::World::next(chargerQ)) {
+                    auto& cpos = c.get<PositionComponent>();
+                    if (std::abs(cpos.x - targetX) < 1.0f && std::abs(cpos.y - targetY) < 1.0f) {
+                        c.destroy();
+                        break;
+                    }
+                }
             }
         }
 
@@ -114,6 +134,18 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
                     RenderSystem::ghostState = GhostState::SCATTER;
                 }
             }
+        }
+
+        // Frightened siren logic
+        static float vulnerableSirenTimer = 0.0f;
+        if (frightenedTimer > 0.0f) {
+            vulnerableSirenTimer -= deltaTime;
+            if (vulnerableSirenTimer <= 0.0f) {
+                SoundManager::getInstance().playSFX("ghost_vulnerable");
+                vulnerableSirenTimer = 0.5f;
+            }
+        } else {
+            vulnerableSirenTimer = 0.0f;
         }
 
         // 4. Ghost-Pacman collisions
@@ -192,8 +224,13 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
         }
 
         if (remainingDots == 0) {
+            bool wasGameOver = statePtr->isGameOver;
             statePtr->shownVictoryPopup = true;
             statePtr->isGameOver = true;
+            if (!wasGameOver) {
+                SoundManager::getInstance().stopBGM();
+                SoundManager::getInstance().playSFX("victory");
+            }
         }
     }
 
@@ -227,7 +264,29 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
 
             state.batteryLevel = battery.current;
             state.isLowBattery = battery.current <= LOW_BATTERY_THRESHOLD;
+            
+            bool wasGameOver = state.isGameOver;
             state.isGameOver = state.isGameOver || (battery.current <= 0.0f);
+            
+            if (state.isGameOver && !wasGameOver) {
+                SoundManager::getInstance().stopBGM();
+                SoundManager::getInstance().playSFX("death");
+            }
+
+            // Heartbeat Logic
+            float batteryPct = (battery.max > 0.0f) ? ((battery.current / battery.max) * 100.0f) : 0.0f;
+            static float heartbeatTimer = 0.0f;
+            if (batteryPct < 30.0f && !state.isGameOver) {
+                heartbeatTimer -= deltaTime;
+                if (heartbeatTimer <= 0.0f) {
+                    SoundManager::getInstance().playSFX("heartbeat");
+                    float interval = 0.4f + 0.8f * (batteryPct / 30.0f);
+                    heartbeatTimer = interval;
+                }
+            } else {
+                heartbeatTimer = 0.0f;
+            }
+
             continue;
         }
 
@@ -241,6 +300,8 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
         if (state.batteryLevel < 0.0f) {
             state.batteryLevel = 0.0f;
             state.isGameOver = true;
+            SoundManager::getInstance().stopBGM();
+            SoundManager::getInstance().playSFX("death");
         }
 
         if (state.batteryLevel > 100.0f) {

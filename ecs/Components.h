@@ -89,6 +89,8 @@ struct FlashlightComponent {
     bool isAvailable = true;
 };
 
+#include "LightingComponents.h"
+
 struct BatteryLifeComponent {
     float current = 100.0f;
     float max = 100.0f;

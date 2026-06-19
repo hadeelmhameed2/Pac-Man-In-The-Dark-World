@@ -29,6 +29,7 @@ private:
     void updateSystems(float deltaTime);
     void applyGhostGridMovement();
     void reset();
+    void createChargers();
 
 private:
     SDL_Window* window = nullptr;

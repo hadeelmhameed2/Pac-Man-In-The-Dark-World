@@ -1,5 +1,6 @@
 #include "BatterySystem.h"
 #include "LightingDebugSystem.h"
+#include "LightingComponents.h"
 #include <algorithm>
 
 void BatterySystem::update(float deltaTime) {
@@ -10,6 +11,7 @@ void BatterySystem::update(float deltaTime) {
 
         auto& battery = e.get<BatteryLifeComponent>();
         auto& flashlight = e.get<FlashlightComponent>();
+        auto& pos = e.get<PositionComponent>();
 
         // === Boost mode countdown ===
         if (battery.boostRemaining > 0.0f) {

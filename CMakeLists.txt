@@ -16,6 +16,10 @@ set(SDLIMAGE_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 add_subdirectory(libs/SDL_image)
 add_subdirectory(libs/box2d/box2d-main)
 
+set(SDLMIXER_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(libs/SDL_mixer)
+
 add_executable(PacmanDarkWorld
         main.cpp
 
@@ -23,6 +27,8 @@ add_executable(PacmanDarkWorld
         src/Game.cpp
         src/Constants.h
         src/GridMovement.h
+        src/SoundManager.h
+        src/SoundManager.cpp
 
         ecs/bagel.h
         ecs/Components.h
@@ -56,11 +62,14 @@ target_include_directories(PacmanDarkWorld PRIVATE
         Systems
         libs/SDL/include
         libs/box2d/box2d-main/include
+        libs/SDL_image/include
+        libs/SDL_mixer/include
 )
 
 target_link_libraries(PacmanDarkWorld PRIVATE
         SDL3-static
         SDL3_image::SDL3_image
+        SDL3_mixer::SDL3_mixer
         box2d
 )
 
@@ -68,4 +77,7 @@ add_custom_command(TARGET PacmanDarkWorld POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/images"
         "$<TARGET_FILE_DIR:PacmanDarkWorld>/images"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:PacmanDarkWorld>/assets"
 )

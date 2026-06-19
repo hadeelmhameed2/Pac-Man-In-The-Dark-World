@@ -20,9 +20,18 @@ void VisibilitySystem::update(bagel::ent_type pacmanId, bagel::ent_type gameStat
     const float pacCenterY = pacPos.y + TILE_SIZE * 0.5f;
 
     float lightRadius = LIGHT_RADIUS * (gameState.batteryLevel / 100.0f);
+    bool isBoosted = false;
+    if (bagel::World::mask(pacmanId).test(bagel::Component<BatteryLifeComponent>::Bit)) {
+        const auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
+        if (battery.mode == PowerMode::Boost) {
+            isBoosted = true;
+            lightRadius = LIGHT_RADIUS * 1.5f; // Boosted light radius (1.5x of default max)
+        }
+    }
+
     if (gameState.isGameOver) {
         lightRadius = LIGHT_RADIUS * 0.25f;
-    } else if (gameState.isLowBattery) {
+    } else if (gameState.isLowBattery && !isBoosted) {
         const float flicker = 0.85f + 0.15f * std::sin(pulseTimer * 8.0f);
         lightRadius *= flicker;
     }

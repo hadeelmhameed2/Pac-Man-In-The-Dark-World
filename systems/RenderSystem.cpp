@@ -8,6 +8,7 @@
 
 
 #include <cmath>
+#include "LightingDebugSystem.h"
 
 namespace {
     float sign(float px, float py, float ax, float ay, float bx, float by) {
@@ -222,9 +223,20 @@ void RenderSystem::render(
 
     float pulseTimer = static_cast<float>(SDL_GetTicks()) / 1000.0f;
     float lightRadius = LIGHT_RADIUS * (batteryLevel / 100.0f);
+    bool isBoosted = false;
+    if (!bagel::World::eof(pacmanQ)) {
+        bagel::Entity pacmanEnt = bagel::World::first(pacmanQ);
+        if (pacmanEnt.has<BatteryLifeComponent>()) {
+            const auto& battery = pacmanEnt.get<BatteryLifeComponent>();
+            if (battery.mode == PowerMode::Boost) {
+                isBoosted = true;
+                lightRadius = LIGHT_RADIUS * 1.5f;
+            }
+        }
+    }
     if (isGameOver) {
         lightRadius = LIGHT_RADIUS * 0.25f;
-    } else if (isLowBattery) {
+    } else if (isLowBattery && !isBoosted) {
         const float flicker = 0.85f + 0.15f * std::sin(pulseTimer * 8.0f);
         lightRadius *= flicker;
     }

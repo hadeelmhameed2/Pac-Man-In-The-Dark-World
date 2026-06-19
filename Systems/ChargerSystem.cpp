@@ -1,6 +1,7 @@
 #include "ChargerSystem.h"
 #include "Constants.h"
 #include "Maze.h"
+#include "SoundManager.h"
 #include <cmath>
 #include <algorithm>
 
@@ -89,6 +90,7 @@ void ChargerSystem::update(float deltaTime, bagel::ent_type pacmanId) {
                     if (battery.boostRemaining <= 0.0f) {
                         // Only trigger boost if not already active (or refresh if shorter)
                         battery.boostRemaining = charger.boostDuration;
+                        SoundManager::getInstance().playSFX("turbine_surge");
                     } else if (charger.boostDuration > battery.boostRemaining) {
                         // Refresh if incoming boost is longer
                         battery.boostRemaining = charger.boostDuration;
