@@ -185,7 +185,7 @@ void Game::createPacman() {
     b2CreateCircleShape(bodyId, &shapeDef, &circle);
 
     entity.addAll(
-        BatteryLifeComponent{ 100.0f, 100.0f, 0.3f, 1.2f },
+        BatteryLifeComponent{ 100.0f, 100.0f, 0.8f, 1.2f },
         FlashlightComponent{ false, true },
         DirectionComponent{ Direction::Right },
         InputComponent{ true },

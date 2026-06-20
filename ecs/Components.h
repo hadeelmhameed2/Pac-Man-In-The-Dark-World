@@ -94,7 +94,7 @@ struct FlashlightComponent {
 struct BatteryLifeComponent {
     float current = 100.0f;
     float max = 100.0f;
-    float normalDrainPerSecond = 0.3f;
+    float normalDrainPerSecond = 0.8f;
     float flashlightDrainPerSecond = 1.2f;
     PowerMode mode = PowerMode::Normal;
     float boostRemaining = 0.0f;
