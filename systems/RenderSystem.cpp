@@ -8,6 +8,8 @@
 
 
 #include <cmath>
+#include <iostream>
+
 #include "LightingDebugSystem.h"
 
 namespace {
@@ -87,6 +89,127 @@ namespace {
 
         return false;
     }
+
+    float ghostGlowFactor(
+    float gx, float gy,
+    float px, float py,
+    Direction pacmanDir,
+    bool flashlightOn,
+    VisionMode visionMode,
+    float lightRadius
+) {
+    if (visionMode == VisionMode::Full) {
+        return 0.0f;
+    }
+
+    float gx_center = gx + 16.0f;
+    float gy_center = gy + 16.0f;
+    float px_center = px + 16.0f;
+    float py_center = py + 16.0f;
+
+    float dx = gx_center - px_center;
+    float dy = gy_center - py_center;
+
+    float dist = std::sqrt(dx * dx + dy * dy);
+
+    // fully illuminated -> no glowing eyes
+    if (dist <= lightRadius) {
+        return 0.0f;
+    }
+
+    // MediumDark mode
+    if (visionMode == VisionMode::MediumDark) {
+
+        float maxDist = lightRadius + 250.0f;
+
+        if (dist >= maxDist)
+            return 0.2f;      // weak glow far away
+
+        float t =
+            (dist - lightRadius) /
+            (maxDist - lightRadius);
+
+        return std::clamp(t, 0.0f, 1.0f);
+    }
+
+    // Flashlight mode
+    if (visionMode == VisionMode::FlashlightOnly) {
+
+        bool illuminated = false;
+
+        if (dist <= 40.0f) {
+            illuminated = true;
+        }
+
+        if (!illuminated && flashlightOn) {
+
+            float length = 320.0f;
+            float width  = 120.0f;
+
+            float x1 = px_center;
+            float y1 = py_center;
+
+            float x2 = px_center;
+            float y2 = py_center;
+
+            float x3 = px_center;
+            float y3 = py_center;
+
+            if (pacmanDir == Direction::Right) {
+                x2 = px_center + length;
+                y2 = py_center - width * 0.5f;
+
+                x3 = px_center + length;
+                y3 = py_center + width * 0.5f;
+            }
+            else if (pacmanDir == Direction::Left) {
+                x2 = px_center - length;
+                y2 = py_center - width * 0.5f;
+
+                x3 = px_center - length;
+                y3 = py_center + width * 0.5f;
+            }
+            else if (pacmanDir == Direction::Up) {
+                x2 = px_center - width * 0.5f;
+                y2 = py_center - length;
+
+                x3 = px_center + width * 0.5f;
+                y3 = py_center - length;
+            }
+            else if (pacmanDir == Direction::Down) {
+                x2 = px_center - width * 0.5f;
+                y2 = py_center + length;
+
+                x3 = px_center + width * 0.5f;
+                y3 = py_center + length;
+            }
+
+            illuminated =
+                pointInTriangle(
+                    gx_center, gy_center,
+                    x1, y1,
+                    x2, y2,
+                    x3, y3
+                );
+        }
+
+        if (illuminated)
+            return 0.0f;
+
+        float maxDist = 500.0f;
+
+        float t =
+            std::clamp(
+                dist / maxDist,
+                0.0f,
+                1.0f
+            );
+
+        return t;
+    }
+
+    return 1.0f;
+}
 
     void drawCircleHelper(SDL_Renderer* renderer, float centerX, float centerY, float radius, Uint8 a) {
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
@@ -392,9 +515,19 @@ void RenderSystem::render(
             auto& position = e.get<PositionComponent>();
             auto& drawing  = e.get<DrawingComponent>();
 
-            bool lit = isGhostLit(position.x, position.y, px, py, pacmanDir, flashlightOn, visionMode, lightRadius);
-            if (!lit) {
-                drawGlowingEyes(renderer, position.x, position.y, drawing.r, drawing.g, drawing.b, 255);
+            float glow =
+            ghostGlowFactor(position.x,position.y,px,py,pacmanDir,flashlightOn,visionMode,lightRadius);
+            if (glow > 0.01f) {
+               Uint8 alpha = static_cast<Uint8>(255.0f * glow);
+                drawGlowingEyes(
+                    renderer,
+                    position.x,
+                    position.y,
+                    drawing.r,
+                    drawing.g,
+                    drawing.b,
+                    alpha
+                );
             }
         }
     }

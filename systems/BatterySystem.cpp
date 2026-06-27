@@ -2,6 +2,7 @@
 #include "LightingDebugSystem.h"
 #include "LightingComponents.h"
 #include <algorithm>
+#include <iostream>
 
 void BatterySystem::update(float deltaTime) {
     for (bagel::Entity e = bagel::Entity::first(); !e.eof(); e.next())
@@ -67,7 +68,7 @@ void BatterySystem::update(float deltaTime) {
 
             // Apply multipliers based on mode
             if (battery.mode == PowerMode::PowerSaving) {
-                drainRate *= 0.5f; // 50% reduction in drain
+                drainRate *= 0.75f; // 25% reduction in drain
             }
             else if (battery.mode == PowerMode::Boost) {
                 // Boost drains faster (default 1.5x from ChargerComponent::boostDrainMultiplier)

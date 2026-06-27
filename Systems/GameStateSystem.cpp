@@ -85,11 +85,14 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
 
             char& cell = MAZE_LAYOUT[pacRow][pacCol];
             if (cell == '.') {
+                auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
+                battery.current = std::min(100.0f, battery.current + 0.3f);
                 cell = ' ';
-
                 statePtr->score += 10;
                 SoundManager::getInstance().playSFX("eating");
             } else if (cell == 'o') {
+                auto& battery = bagel::World::getComponent<BatteryLifeComponent>(pacmanId);
+                battery.current = std::min(100.0f, battery.current + 0.3f);
                 cell = ' ';
                 statePtr->score += 50;
                 frightenedTimer = 7.0f; // Frightened mode lasts 7 seconds
