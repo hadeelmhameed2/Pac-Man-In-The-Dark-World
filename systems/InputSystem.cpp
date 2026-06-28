@@ -1,5 +1,6 @@
 #include "InputSystem.h"
 #include "Constants.h"
+#include "SoundManager.h"
 
 void InputSystem::handleInput(bool& running, VisionMode& visionMode, bool& resetRequested) {
 
@@ -9,10 +10,13 @@ void InputSystem::handleInput(bool& running, VisionMode& visionMode, bool& reset
         .set<GameStateComponent>()
         .build();
     static int stateQ = bagel::World::createQuery(stateMask);
-    bool isGameOver = false;
+    
+    GameState state = GameState::MainMenu;
+    GameStateComponent* stateComp = nullptr;
     if (!bagel::World::eof(stateQ)) {
         bagel::Entity stateEnt = bagel::World::first(stateQ);
-        isGameOver = stateEnt.get<GameStateComponent>().isGameOver;
+        stateComp = &stateEnt.get<GameStateComponent>();
+        state = stateComp->state;
     }
 
     while (SDL_PollEvent(&event)) {
@@ -20,7 +24,47 @@ void InputSystem::handleInput(bool& running, VisionMode& visionMode, bool& reset
             running = false;
         }
 
-        if (isGameOver) {
+        if (state == GameState::MainMenu) {
+            if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT) {
+                float mx = event.button.x;
+                float my = event.button.y;
+
+                float SCALE_X = static_cast<float>(WINDOW_WIDTH) / 1920.0f;
+                float SCALE_Y = static_cast<float>(WINDOW_HEIGHT) / 1080.0f;
+
+                SDL_FRect playRect = { PLAY_AGAIN_X * SCALE_X, PLAY_AGAIN_Y * SCALE_Y, PLAY_AGAIN_W * SCALE_X, PLAY_AGAIN_H * SCALE_Y };
+                SDL_FRect exitRect = { QUIT_GAME_X * SCALE_X, QUIT_GAME_Y * SCALE_Y, QUIT_GAME_W * SCALE_X, QUIT_GAME_H * SCALE_Y };
+
+                if (mx >= playRect.x && mx <= playRect.x + playRect.w &&
+                    my >= playRect.y && my <= playRect.y + playRect.h) {
+                    if (stateComp) {
+                        stateComp->state = GameState::Gameplay;
+                        SoundManager::getInstance().playBGM("normal_bgm");
+                    }
+                }
+                else if (mx >= exitRect.x && mx <= exitRect.x + exitRect.w &&
+                         my >= exitRect.y && my <= exitRect.y + exitRect.h) {
+                    running = false;
+                }
+            }
+
+            if (event.type == SDL_EVENT_KEY_DOWN) {
+                if (event.key.key == SDLK_ESCAPE) {
+                    running = false;
+                    return;
+                }
+                else if (event.key.key == SDLK_RETURN || event.key.key == SDLK_SPACE || event.key.key == SDLK_KP_ENTER) {
+                    if (stateComp) {
+                        stateComp->state = GameState::Gameplay;
+                        SoundManager::getInstance().playBGM("normal_bgm");
+                    }
+                }
+            }
+
+            continue;
+        }
+
+        if (state == GameState::GameOver || state == GameState::Victory || (stateComp && stateComp->isGameOver)) {
             if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT) {
                 float mx = event.button.x;
                 float my = event.button.y;

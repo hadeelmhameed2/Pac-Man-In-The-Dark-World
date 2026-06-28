@@ -39,6 +39,7 @@ private:
     VisionMode visionMode = VisionMode::Full;
     bool wasBatteryAbove50 = true;
 
+    SDL_Texture* mainMenuTexture = nullptr;
     SDL_Texture* gameOverTexture = nullptr;
     SDL_Texture* victoryTexture = nullptr;
     std::vector<std::string> initialMazeLayout;
