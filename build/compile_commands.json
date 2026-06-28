@@ -1,0 +1,224 @@
+[
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\aabb.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\aabb.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\aabb.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\aabb.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\arena_allocator.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\arena_allocator.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\arena_allocator.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\arena_allocator.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\bitset.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\bitset.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\bitset.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\bitset.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\body.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\body.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\body.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\body.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\broad_phase.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\broad_phase.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\broad_phase.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\broad_phase.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\constraint_graph.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\constraint_graph.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\constraint_graph.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\constraint_graph.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\contact.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\contact.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\contact.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\contact.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\contact_solver.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\contact_solver.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\contact_solver.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\contact_solver.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\core.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\core.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\core.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\core.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\distance.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\distance.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\distance.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\distance.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\distance_joint.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\distance_joint.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\distance_joint.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\distance_joint.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\dynamic_tree.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\dynamic_tree.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\dynamic_tree.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\dynamic_tree.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\geometry.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\geometry.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\geometry.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\geometry.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\hull.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\hull.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\hull.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\hull.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\id_pool.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\id_pool.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\id_pool.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\id_pool.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\island.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\island.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\island.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\island.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\joint.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\joint.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\joint.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\joint.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\manifold.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\manifold.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\manifold.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\manifold.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\math_functions.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\math_functions.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\math_functions.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\math_functions.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\motor_joint.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\motor_joint.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\motor_joint.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\motor_joint.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\mover.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\mover.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\mover.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\mover.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\parallel_for.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\parallel_for.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\parallel_for.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\parallel_for.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\physics_world.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\physics_world.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\physics_world.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\physics_world.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\prismatic_joint.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\prismatic_joint.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\prismatic_joint.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\prismatic_joint.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\recording.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\recording.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\recording.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\recording.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\recording_replay.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\recording_replay.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\recording_replay.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\recording_replay.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\revolute_joint.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\revolute_joint.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\revolute_joint.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\revolute_joint.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\scheduler.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\scheduler.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\scheduler.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\scheduler.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\sensor.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\sensor.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\sensor.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\sensor.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\shape.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\shape.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\shape.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\shape.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\solver.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\solver.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\solver.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\solver.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\solver_set.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\solver_set.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\solver_set.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\solver_set.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\table.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\table.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\table.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\table.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\timer.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\timer.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\timer.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\timer.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\types.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\types.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\types.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\types.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\weld_joint.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\weld_joint.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\weld_joint.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\weld_joint.c.obj"
+},
+{
+  "directory": "C:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build",
+  "command": "C:\\Strawberry\\c\\bin\\gcc.exe -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src/../include -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/build/libs/box2d/box2d-main/src -IC:/Users/User/CLionProjects/Pac-Man-In-The-Dark-World/libs/box2d/box2d-main/src -std=gnu17 -fvisibility=hidden -ffp-contract=off -Wmissing-prototypes -Wall -Wextra -pedantic -Wno-unused-value -o libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\wheel_joint.c.obj -c C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\wheel_joint.c",
+  "file": "C:\\Users\\User\\CLionProjects\\Pac-Man-In-The-Dark-World\\libs\\box2d\\box2d-main\\src\\wheel_joint.c",
+  "output": "libs\\box2d\\box2d-main\\src\\CMakeFiles\\box2d.dir\\wheel_joint.c.obj"
+}
+]

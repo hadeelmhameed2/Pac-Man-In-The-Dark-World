@@ -98,7 +98,25 @@ namespace {
         }
     }
 
-    void chooseDirection(MovementComponent& move, const SDL_FPoint& target, float posX, float posY, float speed) {
+    bool isWallForGhost(int col, int row, GhostState state) {
+        if (row == 14 && (col < 0 || col >= MAZE_COLS)) {
+            return false; // Tunnel wrap area is not a wall
+        }
+        if (row < 0 || row >= MAZE_ROWS || col < 0 || col >= MAZE_COLS) {
+            return true;
+        }
+        char cell = MAZE_LAYOUT[row][col];
+        if (cell == '#') {
+            return true;
+        }
+        if (cell == '-') {
+            // The gate is passable ONLY for LeavingHouse or EATEN states
+            return (state != GhostState::LeavingHouse && state != GhostState::EATEN);
+        }
+        return false;
+    }
+
+    void chooseDirection(MovementComponent& move, const SDL_FPoint& target, float posX, float posY, float speed, GhostState state) {
         const float cx = entityCenterX(posX);
         const float cy = entityCenterY(posY);
         const int col = static_cast<int>(std::floor((cx - MAZE_START_X) / MAZE_TILE_SIZE));
@@ -115,7 +133,7 @@ namespace {
         std::vector<DirChoice> reverseChoices;
 
         for (const auto& opt : options) {
-            if (isWall(opt.nextCol, opt.nextRow)) {
+            if (isWallForGhost(opt.nextCol, opt.nextRow, state)) {
                 continue;
             }
             const bool isReverse = (opt.vx == -move.vx && move.vx != 0.0f) || (opt.vy == -move.vy && move.vy != 0.0f);
@@ -166,7 +184,7 @@ namespace {
         std::vector<DirChoice> reverseChoices;
 
         for (const auto& opt : options) {
-            if (isWall(opt.nextCol, opt.nextRow)) {
+            if (isWallForGhost(opt.nextCol, opt.nextRow, GhostState::FRIGHTENED)) {
                 continue;
             }
             const bool isReverse = (opt.vx == -move.vx && move.vx != 0.0f) || (opt.vy == -move.vy && move.vy != 0.0f);
@@ -193,11 +211,11 @@ namespace {
         enforceCardinalMovement(move);
     }
 
-    void ensureGhostKeepsMoving(MovementComponent& move, const SDL_FPoint& target, float posX, float posY) {
+    void ensureGhostKeepsMoving(MovementComponent& move, const SDL_FPoint& target, float posX, float posY, GhostState state) {
         if (std::abs(move.vx) > 0.1f || std::abs(move.vy) > 0.1f) {
             return;
         }
-        chooseDirection(move, target, posX, posY, move.speed);
+        chooseDirection(move, target, posX, posY, move.speed, state);
     }
 }
 
@@ -237,7 +255,16 @@ void GhostAISystem::update(bagel::ent_type pacmanId, float deltaTime) {
 
         move.speed = GHOST_SPEED;
 
-        if (ai.state != GhostState::FRIGHTENED && ai.state != GhostState::EATEN) {
+        // Process house exit timers
+        if (ai.state == GhostState::InHouse) {
+            ai.houseTimer -= deltaTime;
+            if (ai.houseTimer <= 0.0f) {
+                ai.state = GhostState::LeavingHouse;
+            }
+        }
+
+        if (ai.state != GhostState::FRIGHTENED && ai.state != GhostState::EATEN &&
+            ai.state != GhostState::InHouse && ai.state != GhostState::LeavingHouse) {
             ai.state = scatterPhase ? GhostState::SCATTER : GhostState::CHASE;
         }
 
@@ -257,25 +284,37 @@ void GhostAISystem::update(bagel::ent_type pacmanId, float deltaTime) {
                 break;
             case GhostState::FRIGHTENED:
                 break;
+            case GhostState::InHouse:
+                ai.target = { GHOST_HOUSE_X, GHOST_HOUSE_Y };
+                break;
+            case GhostState::LeavingHouse:
+                ai.target = { 394.0f, 331.0f }; // Target exit tile center
+                break;
         }
 
         const int col = tileCol(pos.x);
         const int row = tileRow(pos.y);
         const bool atIntersection = isAtTileCenter(pos.x, pos.y);
         const bool enteredNewTile = col != ai.lastTurnTileCol || row != ai.lastTurnTileRow;
+
+        // Revert back to normal behavior when ghost successfully escapes the house
+        if (ai.state == GhostState::LeavingHouse && row <= 11) {
+            ai.state = scatterPhase ? GhostState::SCATTER : GhostState::CHASE;
+        }
+
         const bool mustTurn = std::abs(move.vx) < 0.1f && std::abs(move.vy) < 0.1f;
 
         if (mustTurn || (atIntersection && enteredNewTile)) {
             if (ai.state == GhostState::FRIGHTENED) {
                 chooseFrightenedDirection(move, e.entity().id, col, row, move.speed);
             } else {
-                chooseDirection(move, ai.target, pos.x, pos.y, move.speed);
+                chooseDirection(move, ai.target, pos.x, pos.y, move.speed, ai.state);
             }
 
             ai.lastTurnTileCol = col;
             ai.lastTurnTileRow = row;
         }
 
-        ensureGhostKeepsMoving(move, ai.target, pos.x, pos.y);
+        ensureGhostKeepsMoving(move, ai.target, pos.x, pos.y, ai.state);
     }
 }

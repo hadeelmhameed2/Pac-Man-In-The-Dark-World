@@ -19,6 +19,13 @@ enum class VisionMode {
     FlashlightOnly
 };
 
+enum class GameState {
+    MainMenu,
+    Gameplay,
+    GameOver,
+    Victory
+};
+
 struct PositionComponent {
     float x = 0.0f;
     float y = 0.0f;
@@ -54,7 +61,7 @@ struct InputComponent {
     bool controlledByPlayer = true;
 };
 
-enum class GhostState { CHASE, SCATTER, FRIGHTENED, EATEN };
+enum class GhostState { CHASE, SCATTER, FRIGHTENED, EATEN, InHouse, LeavingHouse };
 
 struct GhostAI {
     GhostState state = GhostState::SCATTER;
@@ -62,6 +69,7 @@ struct GhostAI {
     int ghostType = 0;
     int lastTurnTileCol = -1;
     int lastTurnTileRow = -1;
+    float houseTimer = 0.0f;
 };
 
 struct VisibilityComponent {
@@ -70,6 +78,7 @@ struct VisibilityComponent {
 };
 
 struct GameStateComponent {
+    GameState state = GameState::MainMenu;
     float batteryLevel = 100.0f;
     int score = 0;
     bool isGameOver = false;

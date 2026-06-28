@@ -51,7 +51,15 @@ namespace {
         ghost.add(PositionComponent{ x, y });
         ghost.add(MovementComponent{ vx, vy, GHOST_SPEED });
         ghost.add(DrawingComponent{ TILE_SIZE, TILE_SIZE, r, g, b, 255 });
-        ghost.add(GhostAI{ GhostState::SCATTER, scatterCorner(ghostType), ghostType });
+        GhostState initialState = GhostState::SCATTER;
+        float initialTimer = 0.0f;
+        if (ghostType > 0) {
+            initialState = GhostState::InHouse;
+            if (ghostType == 1) initialTimer = 2.0f;
+            else if (ghostType == 2) initialTimer = 5.0f;
+            else if (ghostType == 3) initialTimer = 8.0f;
+        }
+        ghost.add(GhostAI{ initialState, scatterCorner(ghostType), ghostType, -1, -1, initialTimer });
         ghost.add(VisibilityComponent{ true, GHOST_MIN_OPACITY });
         ghost.add(PhysicsComponent{ bodyId });
     }
@@ -75,7 +83,7 @@ bool Game::init() {
         SoundManager::getInstance().loadWAV("victory", "assets/audio/victory.wav");
 
         // Start BGM track as a test
-        SoundManager::getInstance().playBGM("normal_bgm");
+        // SoundManager::getInstance().playBGM("normal_bgm");
         SoundManager::getInstance().setBGMVolume(0.5f);
     } else {
         SDL_Log("SoundManager init failed");
@@ -105,6 +113,10 @@ bool Game::init() {
     // Initialize LightingSystem with the renderer
     lightingSystem.setRenderer(renderer);
 
+    mainMenuTexture = IMG_LoadTexture(renderer, "images/MainScreen.png");
+    if (mainMenuTexture == nullptr) {
+        SDL_Log("Failed to load MainScreen.png: %s", SDL_GetError());
+    }
     gameOverTexture = IMG_LoadTexture(renderer, "images/GameOver.png");
     if (gameOverTexture == nullptr) {
         SDL_Log("Failed to load GameOver.png: %s", SDL_GetError());
@@ -158,7 +170,7 @@ bool Game::init() {
 
 void Game::createGameState() {
     bagel::Entity stateEnt = bagel::Entity::create();
-    stateEnt.add(GameStateComponent{ 100.0f, 0, false, false, 0, false, false });
+    stateEnt.add(GameStateComponent{ GameState::MainMenu, 100.0f, 0, false, false, 0, false, false });
     gameStateId = stateEnt.entity();
 }
 
@@ -289,16 +301,16 @@ void Game::run() {
             continue;
         }
 
-        bool isGameOver = false;
+        GameState state = GameState::MainMenu;
         static const bagel::Mask stateMask = bagel::MaskBuilder()
             .set<GameStateComponent>()
             .build();
         static int stateQ = bagel::World::createQuery(stateMask);
         if (!bagel::World::eof(stateQ)) {
-            isGameOver = bagel::World::getComponent<GameStateComponent>(bagel::World::first(stateQ)).isGameOver;
+            state = bagel::World::getComponent<GameStateComponent>(bagel::World::first(stateQ)).state;
         }
 
-        if (!isGameOver) {
+        if (state == GameState::Gameplay) {
             update(deltaTime);
         }
 
@@ -306,6 +318,7 @@ void Game::run() {
         renderSystem.render(
             renderer,
             visionMode,
+            mainMenuTexture,
             gameOverTexture,
             victoryTexture,
             lightingSystem.getShadowMaskTexture()
@@ -401,6 +414,7 @@ void Game::reset() {
     if (!bagel::World::eof(stateQ)) {
         bagel::Entity stateEnt = bagel::World::first(stateQ);
         auto& state = stateEnt.get<GameStateComponent>();
+        state.state = GameState::Gameplay;
         state.batteryLevel = 100.0f;
         state.score = 0;
         state.isGameOver = false;
@@ -447,7 +461,16 @@ void Game::reset() {
         move.vx = initialVx;
         move.vy = initialVy;
 
-        ai.state = GhostState::SCATTER;
+        GhostState initialState = GhostState::SCATTER;
+        float initialTimer = 0.0f;
+        if (ai.ghostType > 0) {
+            initialState = GhostState::InHouse;
+            if (ai.ghostType == 1) initialTimer = 2.0f;
+            else if (ai.ghostType == 2) initialTimer = 5.0f;
+            else if (ai.ghostType == 3) initialTimer = 8.0f;
+        }
+        ai.state = initialState;
+        ai.houseTimer = initialTimer;
         ai.target = scatterCorner(ai.ghostType);
         ai.lastTurnTileCol = -1;
         ai.lastTurnTileRow = -1;
@@ -465,6 +488,10 @@ void Game::reset() {
 }
 
 void Game::clean() {
+    if (mainMenuTexture != nullptr) {
+        SDL_DestroyTexture(mainMenuTexture);
+        mainMenuTexture = nullptr;
+    }
     if (gameOverTexture != nullptr) {
         SDL_DestroyTexture(gameOverTexture);
         gameOverTexture = nullptr;

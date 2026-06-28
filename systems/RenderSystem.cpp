@@ -283,6 +283,7 @@ GhostState RenderSystem::ghostState = GhostState::SCATTER;
 void RenderSystem::render(
     SDL_Renderer* renderer,
     VisionMode visionMode,
+    SDL_Texture* mainMenuTexture,
     SDL_Texture* gameOverTexture,
     SDL_Texture* victoryTexture,
     SDL_Texture* shadowMask
@@ -295,6 +296,46 @@ void RenderSystem::render(
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 12, 255);
     SDL_RenderClear(renderer);
+
+    static const bagel::Mask stateMask = bagel::MaskBuilder()
+        .set<GameStateComponent>()
+        .build();
+    static int stateQ = bagel::World::createQuery(stateMask);
+
+    GameState state = GameState::MainMenu;
+    if (!bagel::World::eof(stateQ)) {
+        bagel::Entity stateEnt = bagel::World::first(stateQ);
+        state = stateEnt.get<GameStateComponent>().state;
+    }
+
+    if (state == GameState::MainMenu) {
+        if (mainMenuTexture != nullptr) {
+            SDL_RenderTexture(renderer, mainMenuTexture, nullptr, nullptr);
+
+            // Handle hover highlights
+            float mx = 0.0f, my = 0.0f;
+            SDL_GetMouseState(&mx, &my);
+
+            float SCALE_X = static_cast<float>(WINDOW_WIDTH) / 1920.0f;
+            float SCALE_Y = static_cast<float>(WINDOW_HEIGHT) / 1080.0f;
+
+            SDL_FRect playRect = { PLAY_AGAIN_X * SCALE_X, PLAY_AGAIN_Y * SCALE_Y, PLAY_AGAIN_W * SCALE_X, PLAY_AGAIN_H * SCALE_Y };
+            SDL_FRect exitRect = { QUIT_GAME_X * SCALE_X, QUIT_GAME_Y * SCALE_Y, QUIT_GAME_W * SCALE_X, QUIT_GAME_H * SCALE_Y };
+
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+            if (mx >= playRect.x && mx <= playRect.x + playRect.w &&
+                my >= playRect.y && my <= playRect.y + playRect.h) {
+                drawButtonHoverEffect(renderer, playRect, SCALE_X, SCALE_Y, false);
+            }
+            if (mx >= exitRect.x && mx <= exitRect.x + exitRect.w &&
+                my >= exitRect.y && my <= exitRect.y + exitRect.h) {
+                drawButtonHoverEffect(renderer, exitRect, SCALE_X, SCALE_Y, false);
+            }
+        }
+        SDL_RenderPresent(renderer);
+        return;
+    }
 
     drawMaze(renderer);
     drawDots(renderer);
@@ -328,10 +369,6 @@ void RenderSystem::render(
         }
     }
 
-    static const bagel::Mask stateMask = bagel::MaskBuilder()
-        .set<GameStateComponent>()
-        .build();
-    static int stateQ = bagel::World::createQuery(stateMask);
 
     float batteryLevel = 100.0f;
     bool isGameOver = false;
@@ -342,6 +379,11 @@ void RenderSystem::render(
         batteryLevel = state.batteryLevel;
         isGameOver = state.isGameOver;
         isLowBattery = state.isLowBattery;
+    }
+
+    if (isGameOver) {
+        visionMode = VisionMode::Full;
+        shadowMask = nullptr;
     }
 
     float pulseTimer = static_cast<float>(SDL_GetTicks()) / 1000.0f;
@@ -923,23 +965,40 @@ void RenderSystem::drawButtonHoverEffect(
     float SCALE_Y,
     bool isVictory
 ) {
-    float flashY = buttonRect.y + buttonRect.h * 0.5f;
+    // Nudge flashY slightly downward (by 5% of button height) to center perfectly with the button's visual text area
+    float flashY = buttonRect.y + buttonRect.h * 0.5f + buttonRect.h * 0.05f;
+    float buttonW = buttonRect.w;
+    float buttonH = buttonRect.h;
 
-    // Dimensions for layout
-    float lensW = 4.0f * SCALE_X;
-    float lensCenterX_left = buttonRect.x + 8.0f * SCALE_X;
-    float lensCenterX_right = buttonRect.x + buttonRect.w - 8.0f * SCALE_X - lensW;
+    // Scale flashlight dimensions dynamically based on button height and width
+    float headH = buttonH * 0.35f;
+    float lensH = headH * 0.85f;
+    float bodyH = headH * 0.4f;
+    float switchH = bodyH * 0.2f;
 
-    // 1. Draw Left Flashlight (pointing Right, aiming inwards)
-    drawSingleFlashlight(renderer, lensCenterX_left, flashY, SCALE_X, SCALE_Y, true);
+    float bodyW = buttonW * 0.08f;
+    float headW = buttonW * 0.02f;
+    float lensW = buttonW * 0.01f;
+    float switchW = bodyW * 0.2f;
 
-    // 2. Draw Right Flashlight (pointing Left, aiming inwards)
-    drawSingleFlashlight(renderer, lensCenterX_right, flashY, SCALE_X, SCALE_Y, false);
+    // Position of left flashlight lens (left body starts inset by 2% of button width)
+    float leftBodyX = buttonRect.x + buttonW * 0.02f;
+    float lensCenterX_left = leftBodyX + bodyW + headW;
+
+    // Position of right flashlight lens (right body ends inset by 2% of button width)
+    float rightBodyX = buttonRect.x + buttonW * 0.98f - bodyW;
+    float lensCenterX_right = rightBodyX - headW - lensW;
+
+    // 1. Draw Left Flashlight
+    drawSingleFlashlight(renderer, lensCenterX_left, flashY, bodyW, bodyH, headW, headH, lensW, lensH, switchW, switchH, true);
+
+    // 2. Draw Right Flashlight
+    drawSingleFlashlight(renderer, lensCenterX_right, flashY, bodyW, bodyH, headW, headH, lensW, lensH, switchW, switchH, false);
 
     // 3. Draw Left Flashlight Light Beam
     float beamStartX_left = lensCenterX_left + lensW;
-    float beamLength = buttonRect.w * 0.5f - 8.0f * SCALE_X - lensW;
-    float beamSpread = buttonRect.h * 0.45f;
+    float beamLength = (buttonRect.x + buttonW * 0.5f) - beamStartX_left;
+    float beamSpread = buttonH * 0.45f;
 
     SDL_Vertex verticesL[3];
     verticesL[0].position = { beamStartX_left, flashY };
@@ -956,7 +1015,7 @@ void RenderSystem::drawButtonHoverEffect(
 
     // 4. Draw Right Flashlight Light Beam
     float beamStartX_right = lensCenterX_right;
-    float beamLength_right = lensCenterX_right - (buttonRect.x + buttonRect.w * 0.5f);
+    float beamLength_right = beamStartX_right - (buttonRect.x + buttonW * 0.5f);
 
     SDL_Vertex verticesR[3];
     verticesR[0].position = { beamStartX_right, flashY };
@@ -975,20 +1034,16 @@ void RenderSystem::drawSingleFlashlight(
     SDL_Renderer* renderer,
     float lensX,
     float flashY,
-    float SCALE_X,
-    float SCALE_Y,
+    float bodyW,
+    float bodyH,
+    float headW,
+    float headH,
+    float lensW,
+    float lensH,
+    float switchW,
+    float switchH,
     bool pointsRight
 ) {
-    // Dimensions
-    float bodyW = 40.0f * SCALE_X;
-    float bodyH = 16.0f * SCALE_Y;
-    float headW = 12.0f * SCALE_X;
-    float headH = 42.0f * SCALE_Y;
-    float lensW = 4.0f * SCALE_X;
-    float lensH = 36.0f * SCALE_Y;
-    float switchW = 8.0f * SCALE_X;
-    float switchH = 3.0f * SCALE_Y;
-
     float headX = 0.0f;
     float bodyX = 0.0f;
     float switchX = 0.0f;
@@ -1014,13 +1069,13 @@ void RenderSystem::drawSingleFlashlight(
     SDL_RenderFillRect(renderer, &bodyRect);
 
     // Draw red accent band on the body
-    float accentW = 4.0f * SCALE_X;
-    float accentX = pointsRight ? (bodyX + bodyW - accentW - 4.0f * SCALE_X) : (bodyX + 4.0f * SCALE_X);
+    float accentW = bodyW * 0.1f;
+    float accentX = pointsRight ? (bodyX + bodyW - accentW - bodyW * 0.1f) : (bodyX + bodyW * 0.1f);
     SDL_FRect accentRect = { accentX, flashY - bodyH * 0.5f, accentW, bodyH };
     SDL_SetRenderDrawColor(renderer, 220, 50, 50, 255);
     SDL_RenderFillRect(renderer, &accentRect);
 
-    // Draw Bezel/Head (Dark grey flared - drawn with flared layers)
+    // Draw Bezel/Head (Dark grey flared)
     float headInnerW = headW * 0.4f;
     float headInnerH = bodyH + (headH - bodyH) * 0.4f;
     float headInnerX = pointsRight ? headX : (headX + headW - headInnerW);

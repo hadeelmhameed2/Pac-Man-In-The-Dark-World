@@ -128,7 +128,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
 
             auto& ai = ghost.get<GhostAI>();
             if (frightenedTimer > 0.0f) {
-                if (ai.state != GhostState::EATEN) {
+                if (ai.state != GhostState::EATEN && ai.state != GhostState::InHouse && ai.state != GhostState::LeavingHouse) {
                     ai.state = GhostState::FRIGHTENED;
                 }
             } else {
@@ -164,8 +164,8 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
 
             if (dist < 24.0f) { //Collision
                 if (ai.state == GhostState::FRIGHTENED) {
-                    // Pacman eats the ghost
-                    ai.state = GhostState::EATEN;
+                    ai.state = GhostState::InHouse;
+                    ai.houseTimer = 2.0f;
                     statePtr->score += 200;
 
                     // Send the ghost back to the ghost house
@@ -230,6 +230,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
             bool wasGameOver = statePtr->isGameOver;
             statePtr->shownVictoryPopup = true;
             statePtr->isGameOver = true;
+            statePtr->state = GameState::Victory;
             if (!wasGameOver) {
                 SoundManager::getInstance().stopBGM();
                 SoundManager::getInstance().playSFX("victory");
@@ -270,6 +271,9 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
             
             bool wasGameOver = state.isGameOver;
             state.isGameOver = state.isGameOver || (battery.current <= 0.0f);
+            if (state.isGameOver) {
+                state.state = GameState::GameOver;
+            }
             
             if (state.isGameOver && !wasGameOver) {
                 SoundManager::getInstance().stopBGM();
@@ -303,6 +307,7 @@ void GameStateSystem::update(bagel::ent_type pacmanId, float deltaTime) {
         if (state.batteryLevel < 0.0f) {
             state.batteryLevel = 0.0f;
             state.isGameOver = true;
+            state.state = GameState::GameOver;
             SoundManager::getInstance().stopBGM();
             SoundManager::getInstance().playSFX("death");
         }

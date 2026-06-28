@@ -13,6 +13,17 @@ namespace {
         constexpr float eps = 4.0f;
         return std::abs(tx - MAZE_TILE_SIZE * 0.5f) <= eps && std::abs(ty - MAZE_TILE_SIZE * 0.5f) <= eps;
     }
+
+    bool isBlockedForPacman(int col, int row) {
+        if (row == 14 && (col < 0 || col >= MAZE_COLS)) {
+            return false; // Tunnel wrap area is not blocked
+        }
+        if (row < 0 || row >= MAZE_ROWS || col < 0 || col >= MAZE_COLS) {
+            return true;
+        }
+        char cell = MAZE_LAYOUT[row][col];
+        return cell == '#' || cell == '-';
+    }
 }
 
 void MovementSystem::update(
@@ -65,7 +76,7 @@ void MovementSystem::update(
                     else if (direction.queued == Direction::Up) nextRow--;
                     else if (direction.queued == Direction::Down) nextRow++;
 
-                    if (!isWall(nextCol, nextRow)) {
+                    if (!isBlockedForPacman(nextCol, nextRow)) {
                         direction.current = direction.queued;
                         direction.queued = Direction::None;
 
@@ -84,7 +95,7 @@ void MovementSystem::update(
                 else if (direction.current == Direction::Up) aheadRow--;
                 else if (direction.current == Direction::Down) aheadRow++;
 
-                if (isWall(aheadCol, aheadRow)) {
+                if (isBlockedForPacman(aheadCol, aheadRow)) {
                     movement.vx = 0.0f;
                     movement.vy = 0.0f;
                     // Snap perfectly to intersection

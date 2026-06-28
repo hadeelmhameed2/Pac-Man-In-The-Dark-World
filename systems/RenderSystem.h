@@ -9,6 +9,7 @@ public:
     void render(
         SDL_Renderer* renderer,
         VisionMode visionMode,
+        SDL_Texture* mainMenuTexture,
         SDL_Texture* gameOverTexture,
         SDL_Texture* victoryTexture,
         SDL_Texture* shadowMask = nullptr
@@ -95,8 +96,14 @@ private:
         SDL_Renderer* renderer,
         float lensX,
         float flashY,
-        float SCALE_X,
-        float SCALE_Y,
+        float bodyW,
+        float bodyH,
+        float headW,
+        float headH,
+        float lensW,
+        float lensH,
+        float switchW,
+        float switchH,
         bool pointsRight
     );
 };
