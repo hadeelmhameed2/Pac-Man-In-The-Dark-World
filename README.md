@@ -1,93 +1,82 @@
-# Pacman in the Dark World - Game Guide
+# Pacman in the Dark World
 
-Welcome to **Pacman in the Dark World**, a survival-horror spin on the classic arcade game. Locked in a pitch-black labyrinth, you must rely on a depleting battery-powered flashlight and your ears to navigate the corridors, collect pellets, and escape the monsters lurking in the shadows.
-
----
-
-## 1. Game Overview
-
-Unlike traditional Pacman, where the entire maze is visible at all times, **Pacman in the Dark World** plunges you into total darkness. Your field of view is limited to a small circle around you or the direct beam of your directional flashlight. The ghosts are invisible in the dark and only reveal their glowing eyes when they step into your light or approach your immediate vicinity.
-
-Your goal remains to eat all the dots/pellets in the maze to win, but you must constantly manage your flashlight battery to avoid going completely blind and being consumed by the darkness.
+**Pacman in the Dark World** is a survival-horror themed adaptation of the classic arcade game built using C++, SDL3, Box2D, and an ECS architecture. Plunged into a dark, shadowy labyrinth, you must navigate using a depleting battery-powered flashlight and your ears to collect dots while avoiding ghosts invisible in the dark.
 
 ---
 
-## 2. Core Mechanics & Features
+## 1. Core Gameplay Mechanics
 
-### 🔦 Battery & Light System
-- **Power Drain**: Pacman's flashlight runs on a battery that continuously drains over time during active gameplay.
-- **Dynamic Visibility**: As the battery level decreases, your field of view dynamically shrinks. The radius of your light circle matches the current battery percentage.
-- **Visual Modes**:
-  - **Full Light**: Visual mode is bright and fully illuminated at start, or when you trigger specific power-ups.
-  - **Medium Darkness**: The battery level drops, casting the maze into deep shadows. You must rely on a close-range light radius to see details.
-  - **Flashlight Only**: The ultimate power-saving mode. The ambient circle shrinks to a tiny sliver, and you must use your movement direction to point a focused flashlight beam down corridors.
+### 🔋 Flashlight & Battery System
+- **Active Power Drain**: Pacman's flashlight battery constantly drains over time during gameplay.
+- **Dynamic Radial Light**:
+  - **Full Light (>50% Battery)**: The entire maze is fully illuminated and visible.
+  - **Medium Darkness (≤50% Battery)**: The maze falls into deep shadow. Pacman is surrounded by a limited radial light circle that shrinks as the battery level drops.
+  - **Out of Power (0% Battery)**: The flashlight goes out, plunging the game into pitch black, leading to an immediate game over.
+- **Flashlight Pickups (`F` items)**: Rendered on screen as a detailed grey flashlight icon. Collecting an `F` item instantly restores **+20.0** to the battery level.
+- **Overcharge Boost**: Certain flashlight pickups trigger a temporary **Boost Mode** (lasting 5 seconds) which expands the light radius by **1.5x**, though it increases the battery consumption rate by **1.5x** as a trade-off.
 
-### 🔋 Battery Replenishment
-- **Light Pellets (`F` items)**: Flashlight batteries can be recharged by collecting battery icons (rendered as `F` letters on the map).
-- **Green Chargers**: Static solar/green charging tiles are located in corners of the map. Stepping onto these chargers rapidly recharges your battery level back to 100%.
+### 👻 Smart Ghost House Release & Respawn
+- **Staggered Entry**: Pinky, Inky, and Clyde spawn inside the central ghost house, pacing back and forth.
+- **Release Timers**: Ghosts are released sequentially:
+  - **Pinky**: 2 seconds.
+  - **Inky**: 5 seconds.
+  - **Clyde**: 8 seconds.
+- **Gate Collision**: The gate tile (`-`) is a one-way path passable only by ghosts in the `LeavingHouse` or `EATEN` states. Pacman is physically blocked from crossing it, preventing him from hiding in the spawn pen.
+- **Respawn Loop**: Eating an Energizer puts the ghosts into a blue, vulnerable state. Eaten ghosts immediately teleport back to the center of the house, pace inside for 2 seconds, and then exit the house again.
 
-### ⚡ Boost Pads
-- **Boost Mode**: Stepping onto a blue **Boost Pad** activates Pacman's emergency backup turbine.
-- **Power Immunity**: Grants **5 seconds of complete immunity** from battery drain.
-- **Super Flare**: The visibility light radius is boosted to **1.5x** its normal capacity, illuminating large sections of the maze.
+### 🌀 Screen Wrapping
+- Tunnels at the left and right edges on **Row 14** allow both Pacman and the ghosts to wrap around horizontally.
 
-### 👻 Smart Ghost House Exit Logic
-- **Staggered Entry**: Pinky, Inky, and Clyde start the game locked inside the central Ghost House (spawn pen).
-- **Exit Release Timers**: The ghosts pace back and forth inside the pen and are released sequentially:
-  - **Pinky**: Leaves after 2 seconds.
-  - **Inky**: Leaves after 5 seconds.
-  - **Clyde**: Leaves after 8 seconds.
-- **Gate Collision Exemption**: The top gate tile (`-`) is passable for ghosts only when they are exiting (`LeavingHouse`) or returning after being eaten (`EATEN`). It is permanently solid for Pacman, preventing him from hiding inside the spawn area.
-- **Post-Consumption Reset**: Eating an Energizer allows Pacman to consume ghosts. Eaten ghosts instantly teleport back to the house, pace inside for 2 seconds, and then exit the house again.
-
-### 🌀 Screen Wrapping Tunnels
-- The horizontal tunnel on **Row 14** allows both Pacman and the ghosts to wrap around from the left edge to the right edge (and vice-versa) to escape tight corners and reset pathfinding chases.
-
-### 🧠 Ghost Personalities & Pathfinding AI
-Each ghost in the Dark World calculates its target tiles uniquely during the active **Chase** phase, based on the coordinates of Pacman and other entities:
-- **Blinky (Red)**: The Direct Aggressor. Targets Pacman's current coordinates directly, tracking his movements continuously.
-- **Pinky (Pink)**: The Ambusher. Targets 4 tiles ahead of Pacman in his current moving direction, attempting to cut him off.
-- **Inky (Cyan)**: The Flanker. Calculates its target by finding the vector from Blinky's current position to 2 tiles ahead of Pacman and doubling it. This results in a flanking or pincer movement designed to trap Pacman between Blinky and itself.
-- **Clyde (Orange)**: The Coward/Shy Chaser. Checks if it is far from Pacman (greater than 8 tiles/`CLYDE_SHY_DISTANCE`). If so, it chases Pacman directly; however, if it gets too close (within 8 tiles), it panics and retreats toward its designated scatter target in the bottom-left corner of the map.
-
-During the **Scatter** phase, the ghosts retreat to the four corners of the maze:
-- **Blinky**: Top-Right corner.
-- **Pinky**: Top-Left corner.
-- **Inky**: Bottom-Right corner.
-- **Clyde**: Bottom-Left corner.
+### 🧠 Ghost AI Personalities (Chase Phase)
+- **Blinky (Red)**: Direct Chaser. Targets Pacman's coordinates directly.
+- **Pinky (Pink)**: Interceptor. Targets 4 tiles ahead of Pacman's direction.
+- **Inky (Cyan)**: Flanker. Targets the vector from Blinky to 2 tiles ahead of Pacman, doubled.
+- **Clyde (Orange)**: Shy Chaser. Chases Pacman directly when far away (>8 tiles), but flees to the bottom-left corner of the map when close (≤8 tiles).
 
 ---
 
-## 3. Audio Subsystem (Powered by SDL3_mixer)
+## 2. Audio Subsystem (SDL3_mixer)
 
-The game features a fully dynamic, adaptive audio engine that changes based on your survival status and battery level:
+The game features a dynamic audio system that responds to gameplay changes:
 
-| Audio Asset | Type | Trigger / Behavior |
-| :--- | :--- | :--- |
-| `normal_bgm` | Music (BGM) | Plays during normal gameplay when battery levels are safe. |
-| `ambient_drone` | Music (BGM) | A tense, quiet drone that automatically replaces the main BGM when the battery falls into critical low-power states. |
-| `heartbeat` | Sound Effect | A warning heartbeat that plays on low battery. The beat **dynamically speeds up** as your battery level drops closer to 0%. |
-| `eating` | Sound Effect | A light retro pop sound triggered when eating standard dots. |
-| `light_pellet` | Sound Effect | A satisfying mechanical thud when collecting battery (`F`) items. |
-| `turbine_surge` | Sound Effect | A mechanical turbine surge effect when activating a blue Boost Pad. |
-| `power_down` | Sound Effect | A heavy power-switch sound triggered when battery levels transition into low-power states. |
-| `death` | Sound Effect | Classic retro game-over theme played when Pacman loses all battery or is caught by a ghost. |
-| `victory` | Sound Effect | An upbeat chime sequence played upon successfully clearing the maze. |
+- **BGMs**:
+  - `normal_bgm`: Plays during normal gameplay (>50% battery).
+  - `ambient_drone`: A low, tense ambient track that replaces the main BGM when the battery drops to 50% or below.
+- **SFXs**:
+  - `eating`: Retro pop sound triggered when eating standard dots.
+  - `light_pellet`: Mechanical click when collecting battery/flashlight (`F`) items.
+  - `power_down`: Plays when transitioning into low-power mode (≤50% battery).
+  - `heartbeat`: Alarm sound playing below 30% battery. Beats faster as the battery nears 0%.
+  - `ghost_vulnerable`: Siren sound playing when ghosts are frightened.
+  - `turbine_surge`: Plays when entering Boost Mode.
+  - `death`: Play-again theme triggered upon game over.
+  - `victory`: Chime sequence played upon eating all dots.
 
 ---
 
-## 4. Controls & Shortcuts
+## 3. Controls
 
-The game is played entirely using the keyboard:
+- **`Arrow Keys`**: Move Pacman (Up, Down, Left, Right).
+- **`Spacebar` / `Enter`**: Starts the game from the Main Menu, or restarts it from the Game Over/Victory screens.
+- **`Escape`**: Quits the game.
 
-### 🎮 Gameplay Navigation
-- **`Up Arrow`**: Move Pacman Up
-- **`Down Arrow`**: Move Pacman Down
-- **`Left Arrow`**: Move Pacman Left
-- **`Right Arrow`**: Move Pacman Right
+---
 
-### 🖥️ Menu Controls
-- **`Spacebar` / `Enter`**: 
-  - Starts the game from the Main Menu.
-  - Resets and restarts the game from the Game Over or Victory screens.
-- **`Escape`**: Quits the game immediately.
+## 4. Compilation & Running
+
+### Prerequisites
+- CMake 3.20+
+- A C++20 compiler
+
+### Build Commands
+```powershell
+cmake -B build
+cmake --build build --config Release
+```
+
+### Running the Game
+Run the executable from the build folder:
+```powershell
+.\build\Release\PacmanDarkWorld.exe
+```
+*(Note: Visual asset folders will be copied into the output directory automatically post-build.)*
